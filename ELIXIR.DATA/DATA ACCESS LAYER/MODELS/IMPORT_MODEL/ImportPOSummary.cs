@@ -99,6 +99,6 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.IMPORT_MODEL
             set; 
         }
         public string Ymir_PO_Number { get; set; }
-
+        public string Ymir_PR_Number { get; set; }
     }
 }

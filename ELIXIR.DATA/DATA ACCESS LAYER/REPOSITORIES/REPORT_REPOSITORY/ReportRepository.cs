@@ -1613,7 +1613,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Fullname = "",
                     AssetTag = "",
                     CIPNo = "",
-                    Helpdesk = "",
+                    Helpdesk = 0,
                     Rush = ""
 
                 }).ToList();
@@ -1641,8 +1641,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Uom = x.moveOrder.Uom,
                     Category = x.moveOrder.Category,
                     Quantity = x.moveOrder != null ? Math.Round(x.moveOrder.QuantityOrdered, 2) : 0,
-                    UnitCost = "",
-                    LineAmount = "",
+                    UnitCost = "0",
+                    LineAmount = "0",
                     Source = x.transact.OrderNo.ToString(),
                     TransactionType = "Move Order",
                     Status = "Transacted",
@@ -1662,7 +1662,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Fullname = x.moveOrder.PreparedBy,
                     AssetTag = "",
                     CIPNo = "",
-                    Helpdesk = "",
+                    Helpdesk = 0,
                     Rush = ""
                 }).ToList();
 
@@ -1702,7 +1702,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Fullname = "",
                     AssetTag = "",
                     CIPNo = "",
-                    Helpdesk = "",
+                    Helpdesk = 0,
                     //Remarks = x.receipt.Remarks,
                     Rush = ""
                 }).ToList();
@@ -1729,7 +1729,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     ItemDescription = x.issue.ItemDescription,
                     Uom = x.issue.Uom,
                     Category = "",
-                    Quantity = Math.Round(x.issue.Quantity, 2),
+                    Quantity = -Math.Round(x.issue.Quantity, 2) ,
                     UnitCost = "",
                     LineAmount = "",
                     Source = x.miscDetail.Id.ToString(),
@@ -1751,7 +1751,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Fullname = x.issue.PreparedBy,
                     AssetTag = "",
                     CIPNo = "",
-                    Helpdesk = "",
+                    Helpdesk = 0,
                     Rush = ""
                 })
                 .ToList();
@@ -1767,7 +1767,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     ItemDescription = x.ItemDescription,
                     Uom = "KG",
                     Category = "",
-                    Quantity = Math.Round(x.QuantityNeeded, 2),
+                    Quantity = -Math.Round(x.QuantityNeeded, 2),
                     UnitCost = "",
                     LineAmount = "",
                     Source = x.Id.ToString(),
@@ -1789,7 +1789,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Fullname = x.PreparedBy,
                     AssetTag = "",
                     CIPNo = "",
-                    Helpdesk = "",
+                    Helpdesk = 0,
                     Rush = ""
                 });
 

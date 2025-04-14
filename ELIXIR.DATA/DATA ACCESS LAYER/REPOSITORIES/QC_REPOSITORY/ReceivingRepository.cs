@@ -462,7 +462,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                      ActualGood = receive != null && receive.IsActive != false ? receive.Actual_Delivered : 0,
                                                      IsActive = posummary.IsActive,
                                                      ActualRemaining = 0,
-                                                     IsQcReceiveIsActive = receive != null ? receive.IsActive : true
+                                                     IsQcReceiveIsActive = receive != null ? receive.IsActive : true,
+                                                     Ymir_PO_Number = posummary.Ymir_PO_Number
                                                  })
                                                         .GroupBy(x => new
                                                         {
@@ -473,7 +474,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                             x.UOM,
                                                             x.QuantityOrdered,
                                                             x.IsActive,
-                                                            x.IsQcReceiveIsActive
+                                                            x.IsQcReceiveIsActive,
+                                                            x.Ymir_PO_Number
                                                         })
                                                    .Select(receive => new PoSummaryChecklistDto
                                                    {
@@ -486,7 +488,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                        ActualGood = receive.Sum(x => x.ActualGood),
                                                        ActualRemaining = ((receive.Key.QuantityOrdered + (receive.Key.QuantityOrdered / 100) * 10) - (receive.Sum(x => x.ActualGood))),
                                                        IsActive = receive.Key.IsActive,
-                                                       IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive
+                                                       IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive,
+                                                       Ymir_PO_Number = receive.Key.Ymir_PO_Number
                                                    }).Where(x => x.IsQcReceiveIsActive == true)
                                                      .FirstOrDefaultAsync(x => x.Id == receiving.PO_Summary_Id);
 
@@ -519,7 +522,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                        IsActive = posummary.IsActive,
                                        IsQcReceiveIsActive = receive != null && receive.IsActive != false ? receive.IsActive : true,
                                        IsWarehouseReceived = receive.IsWareHouseReceive != null,
-                                       ActualRemaining = 0
+                                       ActualRemaining = 0,
+                                       Ymir_PO_Number = posummary.Ymir_PO_Number
 
                                    }).GroupBy(x => new
                                    {
@@ -533,6 +537,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                        x.IsActive,
                                        x.IsQcReceiveIsActive,
                                        x.IsWarehouseReceived,
+                                       x.Ymir_PO_Number
 
                                    })
                                                    .Select(receive => new PoSummaryChecklistDto
@@ -548,7 +553,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                        ActualRemaining = receive.Key.QuantityOrdered - (receive.Sum(x => x.ActualGood)),
                                                        IsActive = receive.Key.IsActive,
                                                        IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive,
-                                                       IsWarehouseReceived = receive.Key.IsWarehouseReceived
+                                                       IsWarehouseReceived = receive.Key.IsWarehouseReceived,
+                                                       Ymir_PO_Number = receive.Key.Ymir_PO_Number
                                                    })
                                                    .OrderBy(x => x.PO_Number)
                                                    .Where(x => x.ActualRemaining != 0)
@@ -586,6 +592,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  IsActive = posummary.IsActive,
                                  IsQcReceiveIsActive = receive != null && receive.IsActive != false ? receive.IsActive : true,
                                  ActualRemaining = 0,
+                                 Ymir_PO_Number = posummary.Ymir_PO_Number
 
                              }).GroupBy(x => new
                              {
@@ -600,7 +607,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  x.Supplier,
                                  x.QuantityOrdered,
                                  x.IsActive,
-                                 x.IsQcReceiveIsActive
+                                 x.IsQcReceiveIsActive,
+                                 x.Ymir_PO_Number
                              })
                                                     .Select(receive => new PoSummaryChecklistDto
                                                     {
@@ -617,7 +625,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                         ActualGood = receive.Sum(x => x.ActualGood),
                                                         ActualRemaining = receive.Key.QuantityOrdered - (receive.Sum(x => x.ActualGood)),
                                                         IsActive = receive.Key.IsActive,
-                                                        IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive
+                                                        IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive,
+                                                        Ymir_PO_Number = receive.Key.Ymir_PO_Number
 
                                                     })
                                                     .OrderBy(x => x.PO_Number)
@@ -652,6 +661,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  IsActive = posummary.IsActive,
                                  IsQcReceiveIsActive = receive != null && receive.IsActive != false ? receive.IsActive : true,
                                  ActualRemaining = 0,
+                                 Ymir_PO_Number = posummary.Ymir_PO_Number
 
                              }).GroupBy(x => new
                              {
@@ -666,7 +676,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  x.Supplier,
                                  x.QuantityOrdered,
                                  x.IsActive,
-                                 x.IsQcReceiveIsActive
+                                 x.IsQcReceiveIsActive,
+                                 x.Ymir_PO_Number
                              })
                                                     .Select(receive => new PoSummaryChecklistDto
                                                     {
@@ -683,7 +694,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                         ActualGood = receive.Sum(x => x.ActualGood),
                                                         ActualRemaining = receive.Key.QuantityOrdered - (receive.Sum(x => x.ActualGood)),
                                                         IsActive = receive.Key.IsActive,
-                                                        IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive
+                                                        IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive,
+                                                        Ymir_PO_Number = receive.Key.Ymir_PO_Number
 
                                                     })
                                                       .OrderBy(x => x.PO_Number)

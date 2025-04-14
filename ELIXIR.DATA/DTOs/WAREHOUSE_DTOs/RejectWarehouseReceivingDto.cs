@@ -23,6 +23,7 @@ namespace ELIXIR.DATA.DTOs.WAREHOUSE_DTOs
         public bool IsWarehouseReceived { get; set; }
         public bool ConfirmRejectByWarehouse { get; set; }
         public bool ConfirmRejectByQc { get; set; }
+        public string Ymir_PO_Number { get; set; }
 
     }
 }

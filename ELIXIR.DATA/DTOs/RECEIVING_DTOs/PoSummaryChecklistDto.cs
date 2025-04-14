@@ -23,6 +23,7 @@ namespace ELIXIR.DATA.DTOs.RECEIVING_DTOs
         public bool IsActive { get; set; }
         public bool IsQcReceiveIsActive { get; set; }
         public bool IsWarehouseReceived { get; set; }
+        public string Ymir_PO_Number { get; set; }
 
 
     }

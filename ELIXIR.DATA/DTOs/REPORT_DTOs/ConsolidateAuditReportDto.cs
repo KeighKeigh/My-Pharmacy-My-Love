@@ -40,7 +40,7 @@ namespace ELIXIR.DATA.DTOs.REPORT_DTOs
         public string AccountTitle { get; set; }
         public string AssetTag { get; set; }
         public string CIPNo { get; set; }
-        public string Helpdesk { get; set; }
+        public int? Helpdesk { get; set; }
         public string Rush { get; set; }
     }
 }

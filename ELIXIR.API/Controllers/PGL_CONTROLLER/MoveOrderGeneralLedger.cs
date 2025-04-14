@@ -1,6 +1,7 @@
 ﻿using ELIXIR.API.Authentication;
 using ELIXIR.API.Controllers;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.STORE_CONTEXT;
+using ELIXIR.DATA.DTOs.REPORT_DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,21 +15,21 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
+namespace ELIXIR.API.Controllers.PGL_CONTROLLER
 {
     [Route("api/pharma-gl"), ApiController]
     [AllowAnonymous]
-    public class ETDGL : ControllerBase
+    public class PHARMAGL : ControllerBase
     {
         private readonly IMediator _mediator;
-        public ETDGL(IMediator mediator)
+        public PHARMAGL(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpGet]
         [ApiKeyAuth]
-        public async Task<IActionResult> Get([FromQuery] ETDGLQuery query)
+        public async Task<IActionResult> Get([FromQuery] PGLQuery query)
         {
             var result = await _mediator.Send(query);
             if (result.IsSuccess)
@@ -42,19 +43,19 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
 
         }
 
-        public class ETDGLQuery : IRequest<Result<List<ETDGLResult>>>
+        public class PGLQuery : IRequest<Result<List<PGLResult>>>
         {
             public string adjustment_month { get; set; }
         }
 
-        public class ETDGLResult
+        public class PGLResult
         {
             public string SyncId { get; set; }
             public string Mark1 { get; set; }
             public string Mark2 { get; set; }
             public string AssetCIP { get; set; }
             public string AccountingTag { get; set; }
-            public string TransactionDate { get; set; }
+            public DateTime? TransactionDate { get; set; }
             public string ClientSupplier { get; set; }
             public string AccountTitleCode { get; set; }
             public string AccountTitle { get; set; }
@@ -93,7 +94,7 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
             public string FinancialStatement { get; set; }
             public string UnitResponsible { get; set; }
             public string Batch { get; set; }
-            public string LineDescription { get; set; }
+            public string Remarks { get; set; }
             public string PayrollPeriod { get; set; }
             public string Position { get; set; }
             public string PayrollType { get; set; }
@@ -106,7 +107,7 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
             public string Particulars { get; set; }
             public string Month2 { get; set; }
             public string FarmType { get; set; }
-            public string JeanRemarks { get; set; }
+            public string Adjustment { get; set; }
             public string From { get; set; }
             public string ChangeTo { get; set; }
             public string Reason { get; set; }
@@ -121,7 +122,7 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
             public string Books { get; set; }
         }
 
-        public class Handler : IRequestHandler<ETDGLQuery, Result<List<ETDGLResult>>>
+        public class Handler : IRequestHandler<PGLQuery, Result<List<PGLResult>>>
         {
             private readonly StoreContext _context;
             public Handler(StoreContext context)
@@ -131,11 +132,11 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
             // Type desc
 
 
-            public async Task<Result<List<ETDGLResult>>> Handle(ETDGLQuery request, CancellationToken cancellationToken)
+            public async Task<Result<List<PGLResult>>> Handle(PGLQuery request, CancellationToken cancellationToken)
             {
                 if (string.IsNullOrWhiteSpace(request.adjustment_month))
                 {
-                    return Result.Success(new List<ETDGLResult>());
+                    return Result.Success(new List<PGLResult>());
                 }
 
                 if (!DateTime.TryParseExact(request.adjustment_month, "yyyy-MM",
@@ -148,141 +149,103 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
                 var startDate = new DateTime(adjustmentMonth.Year, adjustmentMonth.Month, 1);
                 var endDate = startDate.AddMonths(1);
 
+                var moveOrderTask = await MoveOrderTransactions(startDate, endDate);
+                var receiptTask = await ReceiptTransactions(startDate, endDate);
+                var issueTask = await IssueTransactions(startDate, endDate);
+                //var transformTask = await TransformTransactions(startDate, endDate);
 
 
-
-                var transactions = from m in _context.MoveOrders
-                                   join t in _context.TransactMoveOrder
-                                   on m.OrderNo equals t.OrderNo
-                                   join w in _context.WarehouseReceived
-                                   on m.WarehouseId equals w.Id
-
-                                   where t.PreparedDate >= startDate && t.PreparedDate <= endDate && m.IsTransact == true
-                                   //where t.IsActive == true && t.IsTransact == true
-                                   //where t.PreparedDate >= startDate && t.PreparedDate <= endDate
-                                   //where w.IsActive == true
-                                   //where m.PreparedDate >= startDate && m.PreparedDate <= endDate
-                                   //where m.IsActive == true && m.IsTransact == true
+                var consolidateList = moveOrderTask.Concat(receiptTask).Concat(issueTask)
+                    /*.Concat(transformTask)*/;
 
 
-
-                                   select new
-                                   {
-                                       SyncId = m.Id,
-                                       TransactionDate = t.PreparedDate,
-                                       //ClientSupplier = m.CustomerName,
-                                       PONumber = w.PO_Number,
-                                       //RRNumber = w.RRNo,
-                                       ItemCode = w.ItemCode,
-                                       Description = w.ItemDescription,
-                                       Quantity = m.QuantityOrdered,
-                                       //UnitPrice = w.UnitPrice,
-                                       UOM = w.Uom,
-                                       DivisionCode = m.CompanyCode,
-                                       Division = m.CompanyName,
-                                       LocationCode = m.LocationCode,
-                                       Location = m.LocationName,
-                                       AccountTitle = m.AccountTitle,
-                                       AccountCode = m.AccountCode,
-                                       DepartmentCode = m.DepartmentCode,
-                                       Department = m.DepartmentName,
-                                   };
-
-
-
-                var transactonList = await transactions.ToListAsync();
-
-
-
-                var result = transactonList.SelectMany(x => new List<ETDGLResult>
+                var result = consolidateList.SelectMany(x => new List<PGLResult>
                 {
 
                     //debit
-                    new ETDGLResult
+                     new PGLResult
                     {
                         SyncId = "PH-" + (x.SyncId.ToString() ?? string.Empty) + "-D",
-                        Mark1 = string.Empty,
-                        Mark2 = string.Empty,
-                        AssetCIP = string.Empty,
-                        AccountingTag = string.Empty,
-                        TransactionDate = x.TransactionDate.HasValue ? x.TransactionDate.Value.ToString("yyyy-MM-dd") : string.Empty,
-                        ClientSupplier = string.Empty,
-                        AccountTitleCode = x.AccountCode ?? string.Empty,
-                        AccountTitle = x.AccountTitle ?? string.Empty,
+                        Mark1 = x.Mark1 ?? string.Empty,
+                        Mark2 = x.Mark2 ?? string.Empty,
+                        AssetCIP = x.AssetCIP ?? string.Empty,
+                        AccountingTag = x.AccountingTag ?? string.Empty,
+                        TransactionDate = x.TransactionDate,
+                        ClientSupplier = x.ClientSupplier ?? string.Empty,
+                        AccountTitleCode = x.AccountTitleCode ?? string.Empty,
+                        AccountTitle = x.AccountTitle,
                         CompanyCode = "0001",
                         Company = "RDFFLFI",
                         DivisionCode = x.DivisionCode ?? string.Empty,
                         Division = x.Division ?? string.Empty,
                         DepartmentCode = x.DepartmentCode ?? string.Empty,
                         Department = x.Department ?? string.Empty,
-                        UnitCode = string.Empty,
-                        Unit = string.Empty,
-                        SubUnitCode = string.Empty,
-                        SubUnit = string.Empty,
+                        UnitCode = x.UnitCode ?? string.Empty,
+                        Unit = x.Unit ?? string.Empty,
+                        SubUnitCode = x.SubUnitCode ?? string.Empty,
+                        SubUnit = x.SubUnit ?? string.Empty,
                         LocationCode = x.LocationCode ?? string.Empty,
                         Location = x.Location ?? string.Empty,
-                        PONumber = x.PONumber.ToString(),
-                        RRNumber = string.Empty,
-                        ReferenceNo = string.Empty,
+                        PONumber = x.PONumber ?? string.Empty,
+                        RRNumber = x.RRNumber ?? string.Empty,
+                        ReferenceNo = x.ReferenceNo ?? string.Empty,
                         ItemCode = x.ItemCode ?? string.Empty,
-                        ItemDescription = x.Description ?? string.Empty,
-                        Quantity = x.Quantity,
+                        ItemDescription = x.ItemDescription ?? string.Empty,
+                        Quantity = x?.Quantity ?? 0,
                         UOM = x.UOM ?? string.Empty,
-                        UnitPrice = 0,
-                        LineAmount =  0,
+                        UnitPrice = x?.UnitPrice ?? 0,
+                        LineAmount = x?.LineAmount ?? 0,
                         VoucherJournal = string.Empty,
-                        AccountType = string.Empty,
+                        AccountType = "Inventoriables",
                         DRCR = "Debit",
-                        AssetCode = string.Empty,
-                        Asset= string.Empty,
-                        ServiceProviderCode = string.Empty,
-                        ServiceProvider = string.Empty,
+                        AssetCode = x.AssetCode ?? string.Empty,
+                        Asset= x.Asset ?? string.Empty,
+                        ServiceProviderCode = x.ServiceProviderCode ?? string.Empty,
+                        ServiceProvider = x.ServiceProvider ?? string.Empty,
                         BOA = "Inventoriables",
-                        Allocation = string.Empty,
-                        AccountGroup = string.Empty,
-                        AccountSubGroup = string.Empty,
-                        FinancialStatement = string.Empty,
-                        UnitResponsible = string.Empty,
-                        Batch = string.Empty,
-                        LineDescription = string.Empty,
-                        PayrollPeriod = string.Empty,
-                        Position = string.Empty,
-                        PayrollType = string.Empty,
-                        PayrollType2 = string.Empty,
-                        DepreciationDescription = string.Empty,
-                        RemainingDepreciationValue = string.Empty,
-                        UsefulLife = string.Empty,
-                        Month = x?.TransactionDate?.ToString("MMM") ?? string.Empty,
-                        Year = x?.TransactionDate?.ToString("yyyy") ?? string.Empty,
-                        Particulars = string.Empty,
-                        Month2 = string.Empty,
-                        FarmType = string.Empty,
-                        JeanRemarks = string.Empty,
-                        From = string.Empty,
-                        ChangeTo = string.Empty,
-                        Reason = string.Empty,
-                        CheckingRemarks = string.Empty,
-                        BankName = string.Empty,
-                        ChequeNumber = string.Empty,
-                        ChequeVoucherNumber = string.Empty,
-                        ReleasedDate = string.Empty,
-                        ChequeDate = string.Empty,
+                        Allocation = x.Allocation ?? string.Empty,
+                        AccountGroup = "Current Assets",
+                        AccountSubGroup = "Inventories",
+                        FinancialStatement = "Balance Sheet",
+                        UnitResponsible = "MAU",
+                        Batch = x.Batch ?? string.Empty,
+                        Remarks = x.Remarks ?? string.Empty,
+                        PayrollPeriod = x.PayrollPeriod ?? string.Empty,
+                        Position = x.Position ?? string.Empty,
+                        PayrollType = x.PayrollType ?? string.Empty,
+                        PayrollType2 = x.PayrollType2 ?? string.Empty,
+                        DepreciationDescription = x.DepreciationDescription ?? string.Empty,
+                        RemainingDepreciationValue = x.RemainingDepreciationValue ?? string.Empty,
+                        UsefulLife = x.UsefulLife ?? string.Empty,
+                        Month = x.TransactionDate.Value.ToString("MMM") ?? string.Empty,
+                        Year = x.TransactionDate.Value.ToString("yyyy") ?? string.Empty,
+                        Particulars = x.Particulars ?? string.Empty,
+                        Month2 = x.TransactionDate.Value.ToString("yyyyMM") ?? string.Empty,
+                        FarmType = x.FarmType ?? string.Empty,
+                        Adjustment = x.Adjustment ?? string.Empty,
+                        From = x.From ?? string.Empty,
+                        ChangeTo = x.ChangeTo ?? string.Empty,
+                        Reason = x.Reason ?? string.Empty,
+                        CheckingRemarks = x.CheckingRemarks ?? string.Empty,
+                        BankName = x.BankName ?? string.Empty,
+                        ChequeNumber = x.ChequeNumber ?? string.Empty,
+                        ChequeVoucherNumber = x.ChequeVoucherNumber ?? string.Empty,
+                        ReleasedDate = x.ReleasedDate ?? string.Empty,
+                        ChequeDate = x.ChequeDate ?? string.Empty,
                         BOA2 = "Inventoriables",
                         System = "Elixir - Pharmacy",
                         Books = "Journal Book",
                     },
-
-
                     //credit
-                    new ETDGLResult
+                    new PGLResult
                     {
                         SyncId = "PH-" + (x.SyncId.ToString() ?? string.Empty) + "-C",
                         Mark1 = string.Empty,
                         Mark2 = string.Empty,
-                        AssetCIP = string.Empty,
+                        AssetCIP = x.AssetCIP ?? string.Empty,
                         AccountingTag = string.Empty,
-                        TransactionDate = x.TransactionDate.HasValue ? x.TransactionDate.Value.ToString("yyyy-MM-dd") : string.Empty,
-                        ClientSupplier  = string.Empty,
+                        TransactionDate = x.TransactionDate,
+                        ClientSupplier = x.ClientSupplier ?? string.Empty,
                         AccountTitleCode = "115998",
                         AccountTitle = "Materials & Supplies Inventory",
                         CompanyCode = "0001",
@@ -291,58 +254,58 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
                         Division = x.Division ?? string.Empty,
                         DepartmentCode = x.DepartmentCode ?? string.Empty,
                         Department = x.Department ?? string.Empty,
-                        UnitCode = string.Empty,
-                        Unit = string.Empty,
-                        SubUnitCode = string.Empty,
-                        SubUnit = string.Empty,
+                        UnitCode = x.UnitCode ?? string.Empty,
+                        Unit = x.Unit ?? string.Empty,
+                        SubUnitCode = x.SubUnitCode ?? string.Empty,
+                        SubUnit = x.SubUnit ?? string.Empty,
                         LocationCode = x.LocationCode ?? string.Empty,
                         Location = x.Location ?? string.Empty,
-                        PONumber = x.PONumber.ToString(),
-                        RRNumber = string.Empty,
-                        ReferenceNo = string.Empty,
+                        PONumber = x.PONumber ?? string.Empty,
+                        RRNumber = x.RRNumber ?? string.Empty,
+                        ReferenceNo = x.ReferenceNo ?? string.Empty,
                         ItemCode = x.ItemCode ?? string.Empty,
-                        ItemDescription = x.Description ?? string.Empty,
-                        Quantity = -(x?.Quantity) ?? 0,
+                        ItemDescription = x.ItemDescription ?? string.Empty,
+                        Quantity = x?.Quantity ?? 0,
                         UOM = x.UOM ?? string.Empty,
-                        UnitPrice =  0,
-                        LineAmount =  0,
+                        UnitPrice = x?.UnitPrice ?? 0,
+                        LineAmount = -(x?.LineAmount) ?? 0,
                         VoucherJournal = string.Empty,
-                        AccountType = string.Empty,
+                        AccountType = "Inventoriables",
                         DRCR = "Credit",
-                        AssetCode = string.Empty,
-                        Asset= string.Empty,
-                        ServiceProviderCode = string.Empty,
-                        ServiceProvider = string.Empty,
+                        AssetCode = x.AssetCode ?? string.Empty,
+                        Asset= x.Asset ?? string.Empty,
+                        ServiceProviderCode = x.ServiceProviderCode ?? string.Empty,
+                        ServiceProvider = x.ServiceProvider ?? string.Empty,
                         BOA = "Inventoriables",
-                        Allocation = string.Empty,
-                        AccountGroup = string.Empty,
-                        AccountSubGroup = string.Empty,
-                        FinancialStatement = string.Empty,
-                        UnitResponsible = string.Empty,
-                        Batch = string.Empty,
-                        LineDescription = string.Empty,
-                        PayrollPeriod = string.Empty,
-                        Position = string.Empty,
-                        PayrollType = string.Empty,
-                        PayrollType2 = string.Empty,
-                        DepreciationDescription = string.Empty,
-                        RemainingDepreciationValue = string.Empty,
-                        UsefulLife = string.Empty,
-                        Month = x?.TransactionDate?.ToString("MMM") ?? string.Empty,
-                        Year = x?.TransactionDate?.ToString("yyyy") ?? string.Empty,
-                        Particulars = string.Empty,
-                        Month2 = string.Empty,
-                        FarmType = string.Empty,
-                        JeanRemarks = string.Empty,
-                        From = string.Empty,
-                        ChangeTo = string.Empty,
-                        Reason = string.Empty,
-                        CheckingRemarks = string.Empty,
-                        BankName = string.Empty,
-                        ChequeNumber = string.Empty,
-                        ChequeVoucherNumber = string.Empty,
-                        ReleasedDate = string.Empty,
-                        ChequeDate = string.Empty,
+                        Allocation = x.Allocation ?? string.Empty,
+                        AccountGroup = "Current Assets",
+                        AccountSubGroup = "Inventories",
+                        FinancialStatement = "Balance Sheet",
+                        UnitResponsible = "MAU",
+                        Batch = x.Batch ?? string.Empty,
+                        Remarks = x.Remarks ?? string.Empty,
+                        PayrollPeriod = x.PayrollPeriod ?? string.Empty,
+                        Position = x.Position ?? string.Empty,
+                        PayrollType = x.PayrollType ?? string.Empty,
+                        PayrollType2 = x.PayrollType2 ?? string.Empty,
+                        DepreciationDescription = x.DepreciationDescription ?? string.Empty,
+                        RemainingDepreciationValue = x.RemainingDepreciationValue ?? string.Empty,
+                        UsefulLife = x.UsefulLife ?? string.Empty,
+                        Month = x.TransactionDate.Value.ToString("MMM") ?? string.Empty,
+                        Year = x.TransactionDate.Value.ToString("yyyy") ?? string.Empty,
+                        Particulars = x.Particulars ?? string.Empty,
+                        Month2 = x.TransactionDate.Value.ToString("yyyyMM") ?? string.Empty,
+                        FarmType = x.FarmType ?? string.Empty,
+                        Adjustment = x.Adjustment ?? string.Empty,
+                        From = x.From ?? string.Empty,
+                        ChangeTo = x.ChangeTo ?? string.Empty,
+                        Reason = x.Reason ?? string.Empty,
+                        CheckingRemarks = x.CheckingRemarks ?? string.Empty,
+                        BankName = x.BankName ?? string.Empty,
+                        ChequeNumber = x.ChequeNumber ?? string.Empty,
+                        ChequeVoucherNumber = x.ChequeVoucherNumber ?? string.Empty,
+                        ReleasedDate = x.ReleasedDate ?? string.Empty,
+                        ChequeDate = x.ChequeDate ?? string.Empty,
                         BOA2 = "Inventoriables",
                         System = "Elixir - Pharmacy",
                         Books = "Journal Book",
@@ -351,6 +314,209 @@ namespace ELIXIRETD.API.Controllers.ETDGL_CONTROLLER
 
                 return Result.Success(result);
             }
+
+            private async Task<List<PGLResult>> MoveOrderTransactions(DateTime startDate, DateTime endDate)
+            {
+                var result = (from m in _context.MoveOrders
+                                   join t in _context.TransactMoveOrder
+                                   on m.OrderNo equals t.OrderNo
+                                   join w in _context.WarehouseReceived
+                                   on m.WarehouseId equals w.Id
+                                   join u in _context.Users on t.PreparedBy equals u.FullName
+                                   join p in _context.POSummary on w.PO_Number equals p.PO_Number
+                                   
+
+
+                              where t.PreparedDate >= startDate && t.PreparedDate < endDate && m.IsTransact == true
+
+
+
+                                   select new PGLResult
+                                   {
+                                       SyncId = m.Id.ToString(),
+                                       TransactionDate = t.PreparedDate,
+                                       PONumber = w.PO_Number.ToString(),
+                                       RRNumber = "0",
+                                       ItemCode = w.ItemCode,
+                                       ItemDescription = w.ItemDescription,
+                                       Quantity = m.QuantityOrdered,
+                                       UOM = w.Uom,
+                                       UnitPrice = p.UnitPrice,
+                                       LineAmount = m.QuantityOrdered * p.UnitPrice,
+                                       DivisionCode = m.CompanyCode,
+                                       Division = m.CompanyName,
+                                       CheckingRemarks = "Move Order",
+                                       LocationCode = m.LocationCode,
+                                       Location = m.LocationName,
+                                       AccountTitle = m.AccountTitle,
+                                       AccountTitleCode = m.AccountCode,
+                                       DepartmentCode = m.DepartmentCode,
+                                       Department = m.DepartmentName,
+                                       Remarks = m.Remarks,
+                                       ServiceProvider = t.PreparedBy,
+                                       Batch = m.BatchNo,
+                                       ServiceProviderCode = u.UserName,
+                                       ReferenceNo = t.Id.ToString() ?? "",
+                                       FarmType = m.FarmType,
+                                       
+                                   });
+
+                return await result.ToListAsync();
+            }
+            private async Task<List<PGLResult>> ReceiptTransactions(DateTime startDate, DateTime endDate)
+            {
+
+                //var poSummaryDistinct = _context.POSummary.AsEnumerable()
+                //.GroupBy(p => p.ItemCode)
+                //.Select(g => g.FirstOrDefault()).ToList();
+                var poSummaryDistinct = _context.WarehouseReceived
+                .Join(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary });
+
+                var result = _context.MiscellaneousReceipts
+                .GroupJoin(_context.WarehouseReceived, receipt => receipt.Id, warehouse => warehouse.MiscellaneousReceiptId, (receipt, warehouse) => new { receipt, warehouse })
+                .SelectMany(x => x.warehouse.DefaultIfEmpty(), (x, warehouse) => new { x.receipt, warehouse })
+                .Where(x => x.receipt.TransactionDate >= startDate && x.receipt.TransactionDate < endDate)
+                .Where(x => x.warehouse.IsActive == true && x.warehouse.TransactionType == "MiscellaneousReceipt")
+                .Select(x => new PGLResult
+                {
+                    SyncId = x.warehouse.Id.ToString(),
+                    TransactionDate = x.receipt.TransactionDate,
+                    ItemCode = x.warehouse.ItemCode,
+                    ItemDescription = x.warehouse.ItemDescription,
+                    UOM = x.warehouse.Uom,
+                    //Category = "",
+                    Quantity = x.warehouse.ActualGood,
+                    UnitPrice = 0,
+                    LineAmount = 0,
+                    
+                    CheckingRemarks = "Miscellaneous Receipt",
+                    //Status = "",
+                    //Reason = x.receipt.Remarks,
+                    Remarks = x.receipt.Details,
+                    //SupplierName = x.receipt.Supplier,
+                    //EncodedBy = x.receipt.PreparedBy,
+                    CompanyCode = "",
+                    Company = "",
+                    DepartmentCode = "",
+                    Department = "",
+                    LocationCode = "",
+                    Location = "",
+                    AccountTitleCode = "",
+                    AccountTitle = "",
+                    ServiceProvider = x.receipt.PreparedBy,
+                    AssetCIP = "",
+                    PONumber = "",
+                    RRNumber = "0",
+                    //Remarks = x.receipt.Remarks,
+                    
+                });
+
+                return await result.ToListAsync() ;
+            }
+            private async Task<List<PGLResult>> IssueTransactions(DateTime startDate, DateTime endDate)
+            {
+                //var poSummaryDistinct = _context.WarehouseReceived
+                //.Join(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, ( warehouse,posummary) => new { warehouse, posummary })
+                //.Select(x => x.posummary.);
+                
+
+
+                var result = _context.MiscellaneousIssues
+                .GroupJoin(
+                    _context.MiscellaneousIssueDetails,
+                    miscDetail => miscDetail.Id,
+                    issue => issue.IssuePKey,
+                    (miscDetail, issues) => new { miscDetail, issues })
+                .SelectMany(
+                    x => x.issues.DefaultIfEmpty(),
+                    (x, issue) => new { miscDetail = x.miscDetail, issue }
+                )
+                //.Join(poSummaryDistinct, m => m.issue.WarehouseId, w => w.warehouse.Id, (m, w) => new { m.miscDetail, m.issue, w })
+                
+                .Where(x => x.issue == null || x.issue.IsActive == true)
+                .Where(x => x.miscDetail.TransactionDate >= startDate && x.miscDetail.TransactionDate < endDate)
+                .Select(x => new PGLResult
+                {
+                    SyncId = x.issue.Id.ToString(),
+                    TransactionDate = x.miscDetail.TransactionDate,
+                    ItemCode = x.issue.ItemCode,
+                    ItemDescription = x.issue.ItemDescription,
+                    UOM = x.issue.Uom,
+                    PONumber = "",
+                    Quantity = Math.Round(x.issue.Quantity, 2),
+                    UnitPrice = 0,
+                    LineAmount = 0,
+                    //Source = x.miscDetail.Id.ToString(),
+                    CheckingRemarks = "Miscellaneous Issue",
+                    //Status = "",
+                    //Reason = x.issue.Remarks,
+                    Remarks = x.miscDetail.Details,
+                    //SupplierName = "",
+                    ServiceProvider = x.issue.PreparedBy,
+                    CompanyCode = "",
+                    Company = "",
+                    DepartmentCode = "",
+                    Department = "",
+                    LocationCode = "",
+                    Location = "",
+                    AccountTitleCode = "",
+                    AccountTitle = "",
+                    
+                    AssetCIP = "",
+                    RRNumber = "0",
+                    
+                });
+                
+                return await result.ToListAsync();
+            }
+            //.Join(poSummaryDistinct, m => m.issue.ItemCode, po => po.ItemCode, (m, po) => new { m.miscDetail, m.issue, po })
+            //private async Task<List<PGLResult>> TransformTransactions(DateTime startDate, DateTime endDate)
+            //{
+                
+
+
+            //    var result = _context.Transformation_Preparation
+            //    .AsNoTracking()
+            //    .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
+            //    .SelectMany(
+            //        x => x.w.DefaultIfEmpty(),
+            //        (x, w) => new { m = x.m, w })
+            //    .Join(_context.POSummary, x => x.w.PO_Number , po => po.PO_Number, (p, po) => new { p.m, p.w, po })
+            //    .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate && t.m.PreparedDate < endDate)
+            //    .Select(x => new PGLResult
+            //    {
+            //        SyncId = x.m.Id.ToString(),
+            //        TransactionDate = x.m.PreparedDate,
+            //        ItemCode = x.m.ItemCode,
+            //        ItemDescription = x.m.ItemDescription,
+            //        UOM = "KG",
+            //        PONumber = "",
+            //        Quantity = Math.Round(x.m.QuantityNeeded, 2),
+            //        UnitPrice = x.po.UnitPrice,
+            //        LineAmount = (Math.Round(x.m.QuantityNeeded, 2)) * x.po.UnitPrice,
+            //        //Source = x.Id.ToString(),
+            //        CheckingRemarks = "Transformation Preparation",
+            //        //Status = "",
+            //        //Reason = "",
+            //        Remarks = "",
+            //        //SupplierName = "",
+            //        ServiceProvider = x.m.PreparedBy,
+            //        CompanyCode = "",
+            //        Company = "",
+            //        DepartmentCode = "",
+            //        Department = "",
+            //        LocationCode = "",
+            //        Location = "",
+            //        AccountTitleCode = "",
+            //        AccountTitle = "",
+                    
+                    
+            //        AssetCIP = "",
+            //        RRNumber = "0",
+                    
+            //    });
+            //    return await result.ToListAsync();
+            //}
         }
     }
 }
