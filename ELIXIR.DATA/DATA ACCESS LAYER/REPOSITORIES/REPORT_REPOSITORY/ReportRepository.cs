@@ -1,4 +1,5 @@
-﻿using ELIXIR.DATA.CORE.INTERFACES.REPORT_INTERFACE;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using ELIXIR.DATA.CORE.INTERFACES.REPORT_INTERFACE;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.HELPERS;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.ORDERING_MODEL;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.STORE_CONTEXT;
@@ -1303,8 +1304,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Uom = x.Uom,
                     Category = "",
                     Quantity = x.ActualGood,
-                    UnitCost = "",
-                    LineAmount = "",
+                    UnitCost = 0,
+                    LineAmount = 0,
                     Source = x.PO_Number.ToString(),
                     TransactionType = "Receiving",
                     Reason = "",
@@ -1327,43 +1328,50 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Rush = ""
                 }).ToList();
 
-            var moveOrderConsol = _context.TransactMoveOrder
-                .AsNoTracking()
-                .GroupJoin(_context.MoveOrders, tm => tm.OrderNo, m => m.OrderNo,
-                    (transact, moveOrders) => new { transact, moveOrders })
-                .SelectMany(x => x.moveOrders.DefaultIfEmpty(), (x, moveOrder) => new { x.transact, moveOrder })
-                .Select(x => new ConsolidateFinanceReportDto
-                {
-                    Id = x.transact.Id,
-                    TransactionDate = x.transact.PreparedDate ?? default(DateTime),
-                    ItemCode = x.moveOrder != null ? x.moveOrder.ItemCode : "",
-                    ItemDescription = x.moveOrder != null ? x.moveOrder.ItemDescription : "",
-                    Uom = x.moveOrder != null ? x.moveOrder.Uom : "",
-                    Category = x.moveOrder != null ? x.moveOrder.Category : "",
-                    Quantity = x.moveOrder != null ? Math.Round(x.moveOrder.QuantityOrdered, 2) : 0,
-                    UnitCost = "",
-                    LineAmount = "",
-                    Source = Convert.ToString(x.transact.OrderNo),
-                    TransactionType = "Move Order",
-                    Reason = "",
-                    Reference = x.moveOrder != null ? x.moveOrder.OrderNo.ToString() : "",
-                    SupplierName = "",
-                    EncodedBy = x.transact.PreparedBy,
-                    CompanyCode = x.moveOrder != null ? x.moveOrder.CompanyCode : "",
-                    CompanyName = x.moveOrder != null ? x.moveOrder.CompanyName : "",
-                    DepartmentCode = x.moveOrder != null ? x.moveOrder.DepartmentCode : "",
-                    DepartmentName = x.moveOrder != null ? x.moveOrder.DepartmentName : "",
-                    LocationCode = x.moveOrder != null ? x.moveOrder.LocationCode : "",
-                    LocationName = x.moveOrder != null ? x.moveOrder.LocationName : "",
-                    AccountTitleCode = x.moveOrder != null ? x.moveOrder.AccountCode : "",
-                    AccountTitle = "",
-                    EmpId = "",
-                    Fullname = "",
-                    AssetTag = "",
-                    CIPNo = "",
-                    Helpdesk = "",
-                    Rush = ""
-                });
+            var moveOrderConsol = from m in _context.MoveOrders
+                                  join t in _context.TransactMoveOrder
+                                  on m.OrderNo equals t.OrderNo
+                                  join w in _context.WarehouseReceived
+                                  on m.WarehouseId equals w.Id
+                                  join u in _context.Users on t.PreparedBy equals u.FullName
+                                  join p in _context.POSummary on w.PO_Number equals p.PO_Number
+
+
+
+                                  where  m.IsTransact == true
+                                  select new ConsolidateFinanceReportDto
+                                  {
+                                      Id = t.Id,
+                                      TransactionDate = t.PreparedDate,
+                                      ItemCode = m.ItemCode,
+                                      ItemDescription = m.ItemDescription,
+                                      Uom = m.Uom,
+                                      Category = m.Category,
+                                      Quantity = Math.Round(m.QuantityOrdered, 2),
+                                      UnitCost = p.UnitPrice,
+                                      LineAmount = Math.Round(m.QuantityOrdered * p.UnitPrice, 2),
+                                      Source = Convert.ToString(t.OrderNo),
+                                      TransactionType = "Move Order",
+                                      Reason = "",
+                                      Reference = m.OrderNo.ToString(),
+                                      SupplierName = "",
+                                      EncodedBy = t.PreparedBy,
+                                      CompanyCode = m.CompanyCode,
+                                      CompanyName = m.CompanyName,
+                                      DepartmentCode = m.DepartmentCode,
+                                      DepartmentName = m.DepartmentName,
+                                      LocationCode = m.LocationCode,
+                                      LocationName = m.LocationName,
+                                      AccountTitle = "Inventory Transfer",
+                                      AccountTitleCode = "115999",
+                                      EmpId = "",
+                                      Fullname = "",
+                                      AssetTag = "",
+                                      CIPNo = "",
+                                      Helpdesk = "",
+                                      Rush = "",
+                                  };
+
 
 
             var receiptConsol = _context.MiscellaneousReceipts
@@ -1375,14 +1383,14 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateFinanceReportDto
                 {
                     Id = x.warehouse.Id,
-                    TransactionDate = x.receipt.TransactionDate ?? default(DateTime),
+                    TransactionDate = x.receipt.TransactionDate ,
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
                     Uom = x.warehouse.Uom,
                     Category = "",
                     Quantity = x.warehouse.ActualGood,
-                    UnitCost = "",
-                    LineAmount = "",
+                    UnitCost = 0,
+                    LineAmount = 0,
                     Source = Convert.ToString(x.receipt.Id),
                     TransactionType = "Miscellaneous Receipt",
                     Reason = x.receipt.Remarks,
@@ -1395,8 +1403,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     DepartmentName = "",
                     LocationCode = "",
                     LocationName = "",
-                    AccountTitleCode = "",
-                    AccountTitle =  "",
+                    AccountTitle = "Inventory Transfer",
+                    AccountTitleCode = "115999",
                     EmpId = "",
                     Fullname = x.warehouse.ReceivedBy,
                     AssetTag = "",
@@ -1428,8 +1436,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Uom = x.issueDetail != null ? x.issueDetail.Uom : "",
                     Category = "",
                     Quantity = x.issueDetail != null ? Math.Round(x.issueDetail.Quantity, 2) : 0,
-                    UnitCost = "",
-                    LineAmount = "",
+                    UnitCost = 0,
+                    LineAmount = 0,
                     Source = Convert.ToString(x.miscDetail.Id),
                     TransactionType = "Miscellaneous Issue",
                     Reason = x.issueDetail != null ? x.issueDetail.Remarks : "",
@@ -1442,8 +1450,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     DepartmentName = "",
                     LocationCode = "",
                     LocationName = "",
-                    AccountTitleCode = "",
-                    AccountTitle = "",
+                    AccountTitle = "Inventory Transfer",
+                    AccountTitleCode = "115999",
                     EmpId = "",
                     Fullname = x.issueDetail != null ? x.issueDetail.PreparedBy : "",
                     AssetTag = "",
@@ -1455,32 +1463,37 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
             var transformConsol = _context.Transformation_Preparation
                 .AsNoTracking()
-                .Where(t => t.IsActive)
+                .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
+                .SelectMany(
+                    x => x.w.DefaultIfEmpty(),
+                    (x, w) => new { m = x.m, w })
+                .Join(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p.m, p.w, po })
+                .Where(t => t.m.IsActive)
                 .Select(x => new ConsolidateFinanceReportDto
                 {
-                    Id = x.Id,
-                    TransactionDate = x.PreparedDate,
-                    ItemCode = x.ItemCode,
-                    ItemDescription = x.ItemDescription,
+                    Id = x.m.Id,
+                    TransactionDate = x.m.PreparedDate,
+                    ItemCode = x.m.ItemCode,
+                    ItemDescription = x.m.ItemDescription,
                     Uom = "KG",
                     Category = "",
-                    Quantity = Math.Round(x.QuantityNeeded, 2),
-                    UnitCost = "",
-                    LineAmount = "",
+                    Quantity = Math.Round(x.m.QuantityNeeded, 2),
+                    UnitCost = x.po.UnitPrice,
+                    LineAmount = x.po.UnitPrice * (Math.Round(x.m.QuantityNeeded, 2)),
                     Source = "",
-                    TransactionType = "",
+                    TransactionType = "Transformation",
                     Reason = "",
                     Reference = "",
                     SupplierName = "",
-                    EncodedBy = x.PreparedBy,
+                    EncodedBy = x.m.PreparedBy,
                     CompanyCode = "",
                     CompanyName = "",
                     DepartmentCode = "",
                     DepartmentName = "",
                     LocationCode = "",
                     LocationName = "",
-                    AccountTitleCode = "",
-                    AccountTitle = "",
+                    AccountTitleCode = "115998",
+                    AccountTitle = "Materials & Supplies Inventory",
                     EmpId = "",
                     Fullname = "",
                     AssetTag = "",
@@ -1496,24 +1509,24 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 var dateTo = DateTime.Parse(DateTo).Date;
 
                 receivingConsol = receivingConsol
-                    .Where(x => x.TransactionDate.Date >= dateFrom && x.TransactionDate.Date <= dateTo)
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
                     .ToList()
                     ;
 
                 moveOrderConsol = moveOrderConsol
-                    .Where(x => x.TransactionDate.Date >= dateFrom && x.TransactionDate.Date <= dateTo)
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
                     ;
 
                 receiptConsol = receiptConsol
-                    .Where(x => x.TransactionDate.Date >= dateFrom && x.TransactionDate.Date <= dateTo)
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
                     ;
 
                 issueConsol = issueConsol
-                     .Where(x => x.TransactionDate.Date >= dateFrom && x.TransactionDate.Date <= dateTo)
+                     .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
                     ;
 
                 transformConsol = transformConsol
-                    .Where(x => x.TransactionDate.Date >= dateFrom && x.TransactionDate.Date <= dateTo)
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
                     ;
 
             }
@@ -1567,7 +1580,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             }
 
             reports = reports
-                .OrderBy(x => x.TransactionDate.Date)
+                .OrderBy(x => x.TransactionDate)
                 .ThenBy(x => x.ItemCode);
 
 

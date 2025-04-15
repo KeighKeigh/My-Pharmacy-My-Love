@@ -10,7 +10,7 @@ namespace ELIXIR.DATA.DTOs.REPORT_DTOs
     public class ConsolidateFinanceReportDto
     {
         public int Id { get; set; }
-        public DateTime TransactionDate { get; set; }
+        public DateTime? TransactionDate { get; set; }
         public string ItemCode { get; set; }
         public string ItemDescription { get; set; }
 
@@ -21,9 +21,9 @@ namespace ELIXIR.DATA.DTOs.REPORT_DTOs
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Quantity { get; set; }
 
-        public string UnitCost { get; set; }
+        public decimal? UnitCost { get; set; }
 
-        public string LineAmount { get; set; }
+        public decimal? LineAmount { get; set; }
         public string Source { get; set; }
         public string TransactionType { get; set; }
         public string Reason { get; set; }

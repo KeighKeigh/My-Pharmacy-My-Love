@@ -152,11 +152,11 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 var moveOrderTask = await MoveOrderTransactions(startDate, endDate);
                 var receiptTask = await ReceiptTransactions(startDate, endDate);
                 var issueTask = await IssueTransactions(startDate, endDate);
-                //var transformTask = await TransformTransactions(startDate, endDate);
+                var transformTask = await TransformTransactions(startDate, endDate);
 
 
                 var consolidateList = moveOrderTask.Concat(receiptTask).Concat(issueTask)
-                    /*.Concat(transformTask)*/;
+                    .Concat(transformTask);
 
 
                 var result = consolidateList.SelectMany(x => new List<PGLResult>
@@ -348,8 +348,8 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                                        CheckingRemarks = "Move Order",
                                        LocationCode = m.LocationCode,
                                        Location = m.LocationName,
-                                       AccountTitle = m.AccountTitle,
-                                       AccountTitleCode = m.AccountCode,
+                                       AccountTitle =  "Inventory Transfer"/*"DISINFECTANT" || m.Category == "SOLUBLE ANTIBIOTICS" || ? ""*/,
+                                       AccountTitleCode = /*m.AccountCode*/"115999",
                                        DepartmentCode = m.DepartmentCode,
                                        Department = m.DepartmentName,
                                        Remarks = m.Remarks,
@@ -401,8 +401,8 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     Department = "",
                     LocationCode = "",
                     Location = "",
-                    AccountTitleCode = "",
-                    AccountTitle = "",
+                    AccountTitle = /*m.AccountTitle*/"Inventory Transfer",
+                    AccountTitleCode = /*m.AccountCode*/"115999",
                     ServiceProvider = x.receipt.PreparedBy,
                     AssetCIP = "",
                     PONumber = "",
@@ -416,9 +416,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
             private async Task<List<PGLResult>> IssueTransactions(DateTime startDate, DateTime endDate)
             {
                 //var poSummaryDistinct = _context.WarehouseReceived
-                //.Join(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, ( warehouse,posummary) => new { warehouse, posummary })
-                //.Select(x => x.posummary.);
-                
+                //.Join(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary });
 
 
                 var result = _context.MiscellaneousIssues
@@ -431,12 +429,16 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     x => x.issues.DefaultIfEmpty(),
                     (x, issue) => new { miscDetail = x.miscDetail, issue }
                 )
-                //.Join(poSummaryDistinct, m => m.issue.WarehouseId, w => w.warehouse.Id, (m, w) => new { m.miscDetail, m.issue, w })
-                
+                .Join(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, ware) => new { misc.miscDetail, misc.issue, ware })
+                .GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new {warehouse, posummary })
+                .SelectMany( x => x.posummary.DefaultIfEmpty(),
+                (x, posummary) => new{x.warehouse.miscDetail,x.warehouse.issue,x.warehouse.ware,posummary })
+
                 .Where(x => x.issue == null || x.issue.IsActive == true)
                 .Where(x => x.miscDetail.TransactionDate >= startDate && x.miscDetail.TransactionDate < endDate)
                 .Select(x => new PGLResult
                 {
+                    
                     SyncId = x.issue.Id.ToString(),
                     TransactionDate = x.miscDetail.TransactionDate,
                     ItemCode = x.issue.ItemCode,
@@ -444,8 +446,8 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     UOM = x.issue.Uom,
                     PONumber = "",
                     Quantity = Math.Round(x.issue.Quantity, 2),
-                    UnitPrice = 0,
-                    LineAmount = 0,
+                    UnitPrice = x.posummary.UnitPrice,
+                    LineAmount = x.posummary.UnitPrice * (Math.Round(x.issue.Quantity, 2)),
                     //Source = x.miscDetail.Id.ToString(),
                     CheckingRemarks = "Miscellaneous Issue",
                     //Status = "",
@@ -459,9 +461,10 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     Department = "",
                     LocationCode = "",
                     Location = "",
-                    AccountTitleCode = "",
-                    AccountTitle = "",
                     
+                    AccountTitle = "Inventory Transfer",
+                    AccountTitleCode = "115999",
+
                     AssetCIP = "",
                     RRNumber = "0",
                     
@@ -470,53 +473,54 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 return await result.ToListAsync();
             }
             //.Join(poSummaryDistinct, m => m.issue.ItemCode, po => po.ItemCode, (m, po) => new { m.miscDetail, m.issue, po })
-            //private async Task<List<PGLResult>> TransformTransactions(DateTime startDate, DateTime endDate)
-            //{
-                
+            private async Task<List<PGLResult>> TransformTransactions(DateTime startDate, DateTime endDate)
+            {
 
 
-            //    var result = _context.Transformation_Preparation
-            //    .AsNoTracking()
-            //    .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
-            //    .SelectMany(
-            //        x => x.w.DefaultIfEmpty(),
-            //        (x, w) => new { m = x.m, w })
-            //    .Join(_context.POSummary, x => x.w.PO_Number , po => po.PO_Number, (p, po) => new { p.m, p.w, po })
-            //    .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate && t.m.PreparedDate < endDate)
-            //    .Select(x => new PGLResult
-            //    {
-            //        SyncId = x.m.Id.ToString(),
-            //        TransactionDate = x.m.PreparedDate,
-            //        ItemCode = x.m.ItemCode,
-            //        ItemDescription = x.m.ItemDescription,
-            //        UOM = "KG",
-            //        PONumber = "",
-            //        Quantity = Math.Round(x.m.QuantityNeeded, 2),
-            //        UnitPrice = x.po.UnitPrice,
-            //        LineAmount = (Math.Round(x.m.QuantityNeeded, 2)) * x.po.UnitPrice,
-            //        //Source = x.Id.ToString(),
-            //        CheckingRemarks = "Transformation Preparation",
-            //        //Status = "",
-            //        //Reason = "",
-            //        Remarks = "",
-            //        //SupplierName = "",
-            //        ServiceProvider = x.m.PreparedBy,
-            //        CompanyCode = "",
-            //        Company = "",
-            //        DepartmentCode = "",
-            //        Department = "",
-            //        LocationCode = "",
-            //        Location = "",
-            //        AccountTitleCode = "",
-            //        AccountTitle = "",
+
+                var result = _context.Transformation_Preparation
+                .AsNoTracking()
+                .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
+                .SelectMany(
+                    x => x.w.DefaultIfEmpty(),
+                    (x, w) => new { m = x.m, w })
+                .Join(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p.m, p.w, po })
+                .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate && t.m.PreparedDate < endDate)
+                .Select(x => new PGLResult
+                {
+                    SyncId = x.m.Id.ToString(),
+                    TransactionDate = x.m.PreparedDate,
+                    ItemCode = x.m.ItemCode,
+                    ItemDescription = x.m.ItemDescription,
+                    UOM = "KG",
+                    PONumber = "",
+                    Quantity = Math.Round(x.m.QuantityNeeded, 2),
+                    UnitPrice = x.po.UnitPrice,
+                    LineAmount = (Math.Round(x.m.QuantityNeeded, 2)) * x.po.UnitPrice,
+                    //Source = x.Id.ToString(),
+                    CheckingRemarks = "Transformation",
+                    //Status = "",
+                    //Reason = "",
+                    Remarks = "",
+                    //SupplierName = "",
                     
-                    
-            //        AssetCIP = "",
-            //        RRNumber = "0",
-                    
-            //    });
-            //    return await result.ToListAsync();
-            //}
+                    ServiceProvider = x.m.PreparedBy,
+                    CompanyCode = "",
+                    Company = "",
+                    DepartmentCode = "",
+                    Department = "",
+                    LocationCode = "",
+                    Location = "",
+                    AccountTitleCode = "115998",
+                    AccountTitle = "Materials & Supplies Inventory",
+
+
+                    AssetCIP = "",
+                    RRNumber = "0",
+
+                });
+                return await result.ToListAsync();
+            }
         }
     }
 }
