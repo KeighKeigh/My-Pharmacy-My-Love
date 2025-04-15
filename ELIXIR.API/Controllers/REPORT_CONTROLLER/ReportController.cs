@@ -171,6 +171,14 @@ namespace ELIXIR.API.Controllers.REPORT_CONTROLLER
             return Ok(reports);
         }
 
+        [HttpGet]
+        [Route("ConsolidationFinanceReports")]
+        public async Task<IActionResult> ConsolidationFinanceReports([FromQuery] string DateFrom, [FromQuery] string DateTo, [FromQuery] string Search)
+        {
+            var reports = await _unitOfWork.Report.ConsolidateFinanceReport(DateFrom, DateTo, Search);
+
+            return Ok(reports);
+        }
         [HttpGet("ExportConsolidateFinance")]
         public async Task<IActionResult> ExportConsolidateFinance([FromQuery] ConsolidateFinanceExportCommand command)
         {

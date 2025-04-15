@@ -1416,18 +1416,39 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
             var issueConsol = _context.MiscellaneousIssues
                 .AsNoTracking()
-                .GroupJoin(
-                    _context.MiscellaneousIssueDetails,
-                    miscDetail => miscDetail.Id,
-                    issueDetail => issueDetail.IssuePKey,
-                    (miscDetail, issueDetails) => new { miscDetail, issueDetails }
-                )
-                .SelectMany(
-                    x => x.issueDetails.DefaultIfEmpty(),
-                    (x, issueDetail) => new { x.miscDetail, issueDetail }
-                )
-                .Where(x => x.issueDetail == null || x.issueDetail.IsActive)
-                .Select(x => new ConsolidateFinanceReportDto
+                   .GroupJoin(
+                       _context.MiscellaneousIssueDetails,
+                       miscDetail => miscDetail.Id,
+                       issueDetail => issueDetail.IssuePKey,
+                       (miscDetail, issueDetails) => new { miscDetail, issueDetails }
+                   )
+                   .SelectMany(
+                       x => x.issueDetails.DefaultIfEmpty(),
+                       (x, issueDetail) => new { x.miscDetail, issueDetail }
+                   )
+                   .Where(x => x.issueDetail == null || x.issueDetail.IsActive)
+                   .Select(x => new
+                //   .GroupJoin(
+                //    _context.MiscellaneousIssueDetails,
+                //    miscDetail => miscDetail.Id,
+                //    issue => issue.IssuePKey,
+                //    (miscDetail, issues) => new { miscDetail, issues })
+                //.SelectMany(
+                //    x => x.issues.DefaultIfEmpty(),
+                //    (x, issue) => new { miscDetail = x.miscDetail, issue }
+                //)
+                //.GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
+                //.SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
+
+                //.GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
+                //.SelectMany(x => x.posummary.DefaultIfEmpty(),
+                //(x, posummary) => new { x.warehouse.miscDetail, x.warehouse.issue, x.warehouse.ware, posummary })
+                //.Where(x => x.posummary != null)
+
+                //.Where(x => x.issue == null || x.issue.IsActive == true)
+
+                //.Select(x => new 
+                ConsolidateFinanceReportDto
                 {
                     Id = x.issueDetail != null ? x.issueDetail.Id : 0,
                     TransactionDate = x.miscDetail.TransactionDate ?? default(DateTime),

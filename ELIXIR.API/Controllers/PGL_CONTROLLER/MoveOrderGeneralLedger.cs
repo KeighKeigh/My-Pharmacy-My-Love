@@ -317,7 +317,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
 
             private async Task<List<PGLResult>> MoveOrderTransactions(DateTime startDate, DateTime endDate)
             {
-                var result = (from m in _context.MoveOrders
+                var result = (from m in _context.MoveOrders.AsNoTracking()
                                    join t in _context.TransactMoveOrder
                                    on m.OrderNo equals t.OrderNo
                                    join w in _context.WarehouseReceived
@@ -348,8 +348,20 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                                        CheckingRemarks = "Move Order",
                                        LocationCode = m.LocationCode,
                                        Location = m.LocationName,
-                                       AccountTitle =  "Inventory Transfer"/*"DISINFECTANT" || m.Category == "SOLUBLE ANTIBIOTICS" || ? ""*/,
-                                       AccountTitleCode = /*m.AccountCode*/"115999",
+                                       AccountTitle = m.Category == "DISINFECTANT" 
+                                       || m.Category == "SOLUBLE ANTIBIOTICS" 
+                                       || m.Category == "SUPPLIMENTS" 
+                                       || m.Category == "ORAL PREPARATION" 
+                                       || m.Category == "VACCINE POULTRY" 
+                                       || m.Category == "VACCINE SWINE" 
+                                       || m.Category == "INJECTABLES" ? "Inventory Transfer" : "COS - Farm Supplies",
+                                       AccountTitleCode = m.Category == "DISINFECTANT"
+                                       || m.Category == "SOLUBLE ANTIBIOTICS"
+                                       || m.Category == "SUPPLIMENTS"
+                                       || m.Category == "ORAL PREPARATION"
+                                       || m.Category == "VACCINE POULTRY"
+                                       || m.Category == "VACCINE SWINE"
+                                       || m.Category == "INJECTABLES" ? "115999" : "510007",
                                        DepartmentCode = m.DepartmentCode,
                                        Department = m.DepartmentName,
                                        Remarks = m.Remarks,
@@ -369,7 +381,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 //var poSummaryDistinct = _context.POSummary.AsEnumerable()
                 //.GroupBy(p => p.ItemCode)
                 //.Select(g => g.FirstOrDefault()).ToList();
-                var poSummaryDistinct = _context.WarehouseReceived
+                var poSummaryDistinct = _context.WarehouseReceived.AsNoTracking()
                 .Join(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary });
 
                 var result = _context.MiscellaneousReceipts
@@ -415,11 +427,9 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
             }
             private async Task<List<PGLResult>> IssueTransactions(DateTime startDate, DateTime endDate)
             {
-                //var poSummaryDistinct = _context.WarehouseReceived
-                //.Join(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary });
 
 
-                var result = _context.MiscellaneousIssues
+                var result = _context.MiscellaneousIssues.AsNoTracking()
                 .GroupJoin(
                     _context.MiscellaneousIssueDetails,
                     miscDetail => miscDetail.Id,
@@ -429,12 +439,15 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     x => x.issues.DefaultIfEmpty(),
                     (x, issue) => new { miscDetail = x.miscDetail, issue }
                 )
-                .Join(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, ware) => new { misc.miscDetail, misc.issue, ware })
-                .GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new {warehouse, posummary })
-                .SelectMany( x => x.posummary.DefaultIfEmpty(),
-                (x, posummary) => new{x.warehouse.miscDetail,x.warehouse.issue,x.warehouse.ware,posummary })
+                .GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
+                .SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
 
-                .Where(x => x.issue == null || x.issue.IsActive == true)
+                .GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new {warehouse, posummary })
+                .SelectMany(x => x.posummary.DefaultIfEmpty(),
+                (x, posummary) => new{x.warehouse.miscDetail,x.warehouse.issue,x.warehouse.ware,posummary })
+                .Where(x => x.posummary != null)
+
+                .Where(x => x.issue == null || x.issue.IsActive == true) 
                 .Where(x => x.miscDetail.TransactionDate >= startDate && x.miscDetail.TransactionDate < endDate)
                 .Select(x => new PGLResult
                 {
