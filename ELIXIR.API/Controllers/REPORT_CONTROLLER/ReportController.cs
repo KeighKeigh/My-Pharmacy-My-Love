@@ -205,6 +205,14 @@ namespace ELIXIR.API.Controllers.REPORT_CONTROLLER
             }
         }
 
+        [HttpGet]
+        [Route("ConsolidateAuditReport")]
+        public async Task<IActionResult> ConsolidateAuditReport([FromQuery] string DateFrom, [FromQuery] string DateTo, [FromQuery] string Search)
+        {
+            var reports = await _unitOfWork.Report.ConsolidateAuditReport(DateFrom, DateTo, Search);
+
+            return Ok(reports);
+        }
         [HttpGet("ConsolidateAuditExport")]
         public async Task<IActionResult> ConsolidateAuditExport([FromQuery] ConsolidateAuditCommand command)
         {
