@@ -439,13 +439,13 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     x => x.issues.DefaultIfEmpty(),
                     (x, issue) => new { miscDetail = x.miscDetail, issue }
                 )
-                .GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
-                .SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
+                //.GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
+                //.SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
 
-                .GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new {warehouse, posummary })
-                .SelectMany(x => x.posummary.DefaultIfEmpty(),
-                (x, posummary) => new{x.warehouse.miscDetail,x.warehouse.issue,x.warehouse.ware,posummary })
-                .Where(x => x.posummary != null)
+                //.GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new {warehouse, posummary })
+                //.SelectMany(x => x.posummary.DefaultIfEmpty(),
+                //(x, posummary) => new{x.warehouse.miscDetail,x.warehouse.issue,x.warehouse.ware,posummary })
+                //.Where(x => x.posummary != null)
 
                 .Where(x => x.issue == null || x.issue.IsActive == true) 
                 .Where(x => x.miscDetail.TransactionDate >= startDate && x.miscDetail.TransactionDate < endDate)
@@ -459,8 +459,8 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     UOM = x.issue.Uom,
                     PONumber = "",
                     Quantity = Math.Round(x.issue.Quantity, 2),
-                    UnitPrice = x.posummary.UnitPrice,
-                    LineAmount = x.posummary.UnitPrice * (Math.Round(x.issue.Quantity, 2)),
+                    UnitPrice = 1,
+                    LineAmount = 1 * (Math.Round(x.issue.Quantity, 2)),
                     //Source = x.miscDetail.Id.ToString(),
                     CheckingRemarks = "Miscellaneous Issue",
                     //Status = "",

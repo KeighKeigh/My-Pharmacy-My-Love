@@ -17,10 +17,10 @@ namespace ELIXIR.DATA.DTOs.REPORT_DTOs
         public string Category { get; set; }
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Quantity { get; set; }
-        public string UnitCost { get; set; }
+        public decimal? UnitCost { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public string LineAmount { get; set; }
+        public decimal? LineAmount { get; set; }
         public string Source { get; set; }
         public string TransactionType { get; set; }
         public string Status { get; set; }

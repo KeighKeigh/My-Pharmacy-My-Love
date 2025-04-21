@@ -1293,25 +1293,25 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
         public async Task<IReadOnlyList<ConsolidateFinanceReportDto>> ConsolidateFinanceReport(string DateFrom, string DateTo, string Search)
         {
             var receivingConsol = _context.WarehouseReceived
-                .AsNoTracking()
-                .Where(wr => wr.TransactionType == "Receiving" && wr.IsActive)
+                .AsNoTracking().GroupJoin(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse , posummary) => new {warehouse, posummary }).SelectMany(x => x.posummary.DefaultIfEmpty(), (x, posummary) => new {x.warehouse, posummary})
+                .Where(wr => wr.warehouse.TransactionType == "Receiving" && wr.warehouse.IsActive)
                 .Select(x => new ConsolidateFinanceReportDto
                 {
-                    Id = x.Id,
-                    TransactionDate = x.ReceivingDate.Date,
-                    ItemCode = x.ItemCode,
-                    ItemDescription = x.ItemDescription,
-                    Uom = x.Uom,
+                    Id = x.warehouse.Id,
+                    TransactionDate = x.warehouse.ReceivingDate.Date,
+                    ItemCode = x.warehouse.ItemCode,
+                    ItemDescription = x.warehouse.ItemDescription,
+                    Uom = x.warehouse.Uom,
                     Category = "",
-                    Quantity = x.ActualGood,
-                    UnitCost = 0,
-                    LineAmount = 0,
-                    Source = x.PO_Number.ToString(),
+                    Quantity = x.warehouse.ActualGood,
+                    UnitCost = x.posummary.UnitPrice,
+                    LineAmount = x.posummary.UnitPrice * x.warehouse.ActualGood,
+                    Source = x.warehouse.PO_Number.ToString(),
                     TransactionType = "Receiving",
                     Reason = "",
                     Reference = "",
-                    SupplierName = x.Supplier,
-                    EncodedBy = x.ReceivedBy,
+                    SupplierName = x.warehouse.Supplier,
+                    EncodedBy = x.warehouse.ReceivedBy,
                     CompanyCode = "10",
                     CompanyName = "RDF Corporate Services",
                     DepartmentCode = "0010",
@@ -1379,6 +1379,10 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .GroupJoin(_context.WarehouseReceived, r => r.Id, w => w.MiscellaneousReceiptId,
                     (receipt, warehouse) => new { receipt, warehouse })
                 .SelectMany(x => x.warehouse.DefaultIfEmpty(), (x, warehouse) => new { x.receipt, warehouse })
+                .GroupJoin(_context.POSummary, warehouse => warehouse.warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
+                .SelectMany(x => x.posummary.DefaultIfEmpty(), (x, posummary) => new { x.warehouse.receipt, x.warehouse.warehouse, posummary })
+                .Where(x => x.posummary != null)
+
                 .Where(x => x.warehouse.IsActive && x.warehouse.TransactionType == "MiscellaneousReceipt")
                 .Select(x => new ConsolidateFinanceReportDto
                 {
@@ -1389,8 +1393,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Uom = x.warehouse.Uom,
                     Category = "",
                     Quantity = x.warehouse.ActualGood,
-                    UnitCost = 0,
-                    LineAmount = 0,
+                    UnitCost = x.posummary.UnitPrice,
+                    LineAmount = x.posummary.UnitPrice * x.warehouse.ActualGood,
                     Source = Convert.ToString(x.receipt.Id),
                     TransactionType = "Miscellaneous Receipt",
                     Reason = x.receipt.Remarks,
@@ -1416,55 +1420,58 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
             var issueConsol = _context.MiscellaneousIssues
                 .AsNoTracking()
+                   //.GroupJoin(
+                   //    _context.MiscellaneousIssueDetails,
+                   //    miscDetail => miscDetail.Id,
+                   //    issueDetail => issueDetail.IssuePKey,
+                   //    (miscDetail, issueDetails) => new { miscDetail, issueDetails }
+                   //)
+                   //.SelectMany(
+                   //    x => x.issueDetails.DefaultIfEmpty(),
+                   //    (x, issueDetail) => new { x.miscDetail, issueDetail }
+                   //)
+                   //.Where(x => x.issueDetail == null || x.issueDetail.IsActive)
+                   //.Select(x => new
+
+
                    .GroupJoin(
-                       _context.MiscellaneousIssueDetails,
-                       miscDetail => miscDetail.Id,
-                       issueDetail => issueDetail.IssuePKey,
-                       (miscDetail, issueDetails) => new { miscDetail, issueDetails }
-                   )
-                   .SelectMany(
-                       x => x.issueDetails.DefaultIfEmpty(),
-                       (x, issueDetail) => new { x.miscDetail, issueDetail }
-                   )
-                   .Where(x => x.issueDetail == null || x.issueDetail.IsActive)
-                   .Select(x => new
-                //   .GroupJoin(
-                //    _context.MiscellaneousIssueDetails,
-                //    miscDetail => miscDetail.Id,
-                //    issue => issue.IssuePKey,
-                //    (miscDetail, issues) => new { miscDetail, issues })
-                //.SelectMany(
-                //    x => x.issues.DefaultIfEmpty(),
-                //    (x, issue) => new { miscDetail = x.miscDetail, issue }
-                //)
-                //.GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
-                //.SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
+                    _context.MiscellaneousIssueDetails,
+                    miscDetail => miscDetail.Id,
+                    issue => issue.IssuePKey,
+                    (miscDetail, issues) => new { miscDetail, issues })
+                .SelectMany(
+                    x => x.issues.DefaultIfEmpty(),
+                    (x, issue) => new { miscDetail = x.miscDetail, issue }
+                )
 
-                //.GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
-                //.SelectMany(x => x.posummary.DefaultIfEmpty(),
-                //(x, posummary) => new { x.warehouse.miscDetail, x.warehouse.issue, x.warehouse.ware, posummary })
-                //.Where(x => x.posummary != null)
+                .GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
+                .SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
 
-                //.Where(x => x.issue == null || x.issue.IsActive == true)
+                .GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
+                .SelectMany(x => x.posummary.DefaultIfEmpty(),
+                (x, posummary) => new { x.warehouse.miscDetail, x.warehouse.issue, x.warehouse.ware, posummary })
+                .Where(x => x.posummary != null)
 
-                //.Select(x => new 
+                .Where(x => x.issue == null || x.issue.IsActive == true)
+
+                .Select(x => new
                 ConsolidateFinanceReportDto
                 {
-                    Id = x.issueDetail != null ? x.issueDetail.Id : 0,
+                    Id = x.issue.Id ,
                     TransactionDate = x.miscDetail.TransactionDate ?? default(DateTime),
-                    ItemCode = x.issueDetail != null ? x.issueDetail.ItemCode : "",
-                    ItemDescription = x.issueDetail != null ? x.issueDetail.ItemDescription : "",
-                    Uom = x.issueDetail != null ? x.issueDetail.Uom : "",
+                    ItemCode = x.issue.ItemCode ,
+                    ItemDescription = x.issue.ItemDescription ,
+                    Uom = x.issue.Uom,
                     Category = "",
-                    Quantity = x.issueDetail != null ? Math.Round(x.issueDetail.Quantity, 2) : 0,
-                    UnitCost = 0,
-                    LineAmount = 0,
+                    Quantity = Math.Round(x.issue.Quantity, 2),
+                    UnitCost = x.posummary.UnitPrice == 0 ? 1 : 1,
+                    LineAmount = (x.posummary.UnitPrice * (Math.Round(x.issue.Quantity, 2))) == 0 ? 1 : 1,
                     Source = Convert.ToString(x.miscDetail.Id),
                     TransactionType = "Miscellaneous Issue",
-                    Reason = x.issueDetail != null ? x.issueDetail.Remarks : "",
+                    Reason = x.issue.Remarks ,
                     Reference = x.miscDetail.Details,
                     SupplierName = "",
-                    EncodedBy = x.issueDetail != null ? x.issueDetail.PreparedBy : "",
+                    EncodedBy = x.issue.PreparedBy,
                     CompanyCode = "",
                     CompanyName = "",
                     DepartmentCode = "",
@@ -1474,7 +1481,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     AccountTitle = "Inventory Transfer",
                     AccountTitleCode = "115999",
                     EmpId = "",
-                    Fullname = x.issueDetail != null ? x.issueDetail.PreparedBy : "",
+                    Fullname = x.issue.PreparedBy,
                     AssetTag = "",
                     CIPNo = "",
                     Helpdesk = "",
@@ -1527,7 +1534,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             if (!string.IsNullOrEmpty(DateFrom) && !string.IsNullOrEmpty(DateTo))
             {
                 var dateFrom = DateTime.Parse(DateFrom).Date;
-                var dateTo = DateTime.Parse(DateTo).Date;
+                var dateTo = DateTime.Parse(DateTo).Date.AddDays(1);
 
                 receivingConsol = receivingConsol
                     .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
@@ -1615,26 +1622,28 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             var dateTo = DateTime.Parse(DateTo).Date;
 
             var receivingConsol = _context.WarehouseReceived
-                .Where(x => x.TransactionType == "Receiving" && x.IsActive == true)
-                .Where(x => x.ReceivingDate.Date >= dateFrom && x.ReceivingDate.Date <= dateTo)
+                .AsNoTracking().GroupJoin(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
+                .SelectMany(x => x.posummary.DefaultIfEmpty(), (x, posummary) => new { x.warehouse, posummary })
+                .Where(x => x.warehouse.TransactionType == "Receiving" && x.warehouse.IsActive == true)
+                .Where(x => x.warehouse.ReceivingDate.Date >= dateFrom && x.warehouse.ReceivingDate.Date <= dateTo)
                 .Select(x => new ConsolidateAuditReportDto
                 {
-                    Id = x.Id,
-                    TransactionDate = x.ReceivingDate.Date.ToString(),
-                    ItemCode = x.ItemCode,
-                    ItemDescription = x.ItemDescription,
-                    Uom = x.Uom,
+                    Id = x.warehouse.Id,
+                    TransactionDate = x.warehouse.ReceivingDate.Date.ToString(),
+                    ItemCode = x.warehouse.ItemCode,
+                    ItemDescription = x.warehouse.ItemDescription,
+                    Uom = x.warehouse.Uom,
                     Category = "",
-                    Quantity = x.ActualGood,
-                    UnitCost = "",
-                    LineAmount = "",
-                    Source = x.PO_Number.ToString(),
+                    Quantity = x.warehouse.ActualGood,
+                    UnitCost = x.posummary.UnitPrice,
+                    LineAmount = x.posummary.UnitPrice * x.warehouse.ActualGood,
+                    Source = x.warehouse.PO_Number.ToString(),
                     TransactionType = "Receiving",
                     Status = "",
                     Reason = "",
                     Reference = "",
-                    SupplierName = x.Supplier,
-                    EncodedBy = x.ReceivedBy,
+                    SupplierName = x.warehouse.Supplier,
+                    EncodedBy = x.warehouse.ReceivedBy,
                     CompanyCode = "10",
                     CompanyName = "RDF Corporate Services",
                     DepartmentCode = "0010",
@@ -1653,57 +1662,56 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 }).ToList();
 
 
-            var moveOrderConsol = _context.TransactMoveOrder
-                .GroupJoin(
-                    _context.MoveOrders,
-                    transact => transact.OrderNo,
-                    moveOrder => moveOrder.OrderNo,
-                    (transact, moveOrders) => new { transact, moveOrders }
-                )
-                .SelectMany(
-                    x => x.moveOrders.DefaultIfEmpty(),
-                    (x, moveOrder) => new { x.transact, moveOrder }
-                )
-                .Where(x => x.transact.IsTransact == true && x.transact.IsActive == true && (x.moveOrder == null || x.moveOrder.IsActive == true))
-                .Where(x => x.transact.DeliveryDate.Value >= dateFrom.Date && x.transact.DeliveryDate.Value <= dateTo)
-                .Select(x => new ConsolidateAuditReportDto
-                {
-                    Id = x.transact.Id,
-                    TransactionDate = x.transact.PreparedDate.Value.Date.ToString(),
-                    ItemCode = x.moveOrder.ItemCode,
-                    ItemDescription = x.moveOrder.ItemDescription,
-                    Uom = x.moveOrder.Uom,
-                    Category = x.moveOrder.Category,
-                    Quantity = x.moveOrder != null ? Math.Round(x.moveOrder.QuantityOrdered, 2) : 0,
-                    UnitCost = "0",
-                    LineAmount = "0",
-                    Source = x.transact.OrderNo.ToString(),
-                    TransactionType = "Move Order",
-                    Status = "Transacted",
-                    Reason = string.Empty,
-                    Reference = x.moveOrder.Remarks,
-                    SupplierName = string.Empty,
-                    EncodedBy = x.transact.PreparedBy,
-                    CompanyCode = x.moveOrder.CompanyCode,
-                    CompanyName = x.moveOrder.CompanyName,
-                    DepartmentCode = x.moveOrder.DepartmentCode,
-                    DepartmentName = x.moveOrder.DepartmentName,
-                    LocationCode = x.moveOrder.LocationCode,
-                    LocationName = x.moveOrder.LocationName,
-                    AccountTitleCode = x.moveOrder.AccountCode,
-                    AccountTitle = "",
-                    EmpId = "",
-                    Fullname = x.moveOrder.PreparedBy,
-                    AssetTag = "",
-                    CIPNo = "",
-                    Helpdesk = 0,
-                    Rush = ""
-                }).ToList();
+            var moveOrderConsol = from m in _context.MoveOrders.AsNoTracking()
+                                  join t in _context.TransactMoveOrder
+                                  on m.OrderNo equals t.OrderNo
+                                  join w in _context.WarehouseReceived
+                                  on m.WarehouseId equals w.Id
+                                  join u in _context.Users on t.PreparedBy equals u.FullName
+                                  join p in _context.POSummary on w.PO_Number equals p.PO_Number
+
+
+
+                                  where t.PreparedDate >= dateFrom && t.PreparedDate < dateTo && m.IsTransact == true
+                                  select new ConsolidateAuditReportDto
+                                  {
+                                      Id = t.Id,
+                                      TransactionDate = t.PreparedDate.Value.Date.ToString(),
+                                      ItemCode = m.ItemCode,
+                                      ItemDescription = m.ItemDescription,
+                                      Uom = m.Uom,
+                                      Category = m.Category,
+                                      Quantity = m != null ? Math.Round(m.QuantityOrdered, 2) : 0,
+                                      UnitCost = p.UnitPrice,
+                                      LineAmount = p.UnitPrice * (m != null ? Math.Round(m.QuantityOrdered, 2) : 0),
+                                      Source = t.OrderNo.ToString(),
+                                      TransactionType = "Move Order",
+                                      Status = "Transacted",
+                                      Reason = string.Empty,
+                                      Reference = m.Remarks,
+                                      SupplierName = string.Empty,
+                                      EncodedBy = t.PreparedBy,
+                                      CompanyCode = m.CompanyCode,
+                                      CompanyName = m.CompanyName,
+                                      DepartmentCode = m.DepartmentCode,
+                                      DepartmentName = m.DepartmentName,
+                                      LocationCode = m.LocationCode,
+                                      LocationName = m.LocationName,
+                                      AccountTitleCode = m.AccountCode,
+                                      AccountTitle = "",
+                                      EmpId = "",
+                                      Fullname = m.PreparedBy,
+                                      AssetTag = "",
+                                      CIPNo = "",
+                                      Helpdesk = 0,
+                                      Rush = ""
+                                  };
 
 
             var receiptConsol = _context.MiscellaneousReceipts
                 .GroupJoin(_context.WarehouseReceived, receipt => receipt.Id, warehouse => warehouse.MiscellaneousReceiptId, (receipt, warehouse) => new { receipt, warehouse })
                 .SelectMany(x => x.warehouse.DefaultIfEmpty(), (x, warehouse) => new { x.receipt, warehouse })
+                
                 .Where(x => x.receipt.TransactionDate.Value >= dateFrom && x.receipt.TransactionDate.Value <= dateTo)
                 .Where(x => x.warehouse.IsActive == true && x.warehouse.TransactionType == "MiscellaneousReceipt")
                 .Select(x => new ConsolidateAuditReportDto
@@ -1715,8 +1723,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Uom = x.warehouse.Uom,
                     Category = "",
                     Quantity = x.warehouse.ActualGood,
-                    UnitCost = "",
-                    LineAmount = "",
+                    UnitCost = 0,
+                    LineAmount = 0,
                     Source = x.receipt.Id.ToString(),
                     TransactionType = "Miscellaneous Receipt",
                     Status = "",
@@ -1739,7 +1747,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Helpdesk = 0,
                     //Remarks = x.receipt.Remarks,
                     Rush = ""
-                }).ToList();
+                });
 
 
             var issueConsol = _context.MiscellaneousIssues
@@ -1747,12 +1755,17 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     _context.MiscellaneousIssueDetails,
                     miscDetail => miscDetail.Id,
                     issue => issue.IssuePKey,
-                    (miscDetail, issues) => new { miscDetail, issues }
-                )
+                    (miscDetail, issues) => new { miscDetail, issues })
                 .SelectMany(
                     x => x.issues.DefaultIfEmpty(),
-                    (x, issue) => new { miscDetail = x.miscDetail, issue }
-                )
+                    (x, issue) => new { miscDetail = x.miscDetail, issue })
+                .GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
+                .SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
+
+                .GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
+                .SelectMany(x => x.posummary.DefaultIfEmpty(),
+                (x, posummary) => new { x.warehouse.miscDetail, x.warehouse.issue, x.warehouse.ware, posummary })
+                .Where(x => x.posummary != null)
                 .Where(x => x.issue == null || x.issue.IsActive == true)
                 .Where(x => x.miscDetail.TransactionDate.Value >= dateFrom && x.miscDetail.TransactionDate.Value <= dateTo)
                 .Select(x => new ConsolidateAuditReportDto
@@ -1763,9 +1776,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     ItemDescription = x.issue.ItemDescription,
                     Uom = x.issue.Uom,
                     Category = "",
-                    Quantity = -Math.Round(x.issue.Quantity, 2) ,
-                    UnitCost = "",
-                    LineAmount = "",
+                    Quantity = Math.Round(x.issue.Quantity, 2) ,
+                    UnitCost = x.posummary.UnitPrice == 0 ? 1 : 1,
+                    LineAmount = (x.posummary.UnitPrice * (Math.Round(x.issue.Quantity, 2))) == 0 ? 1 : 1,
                     Source = x.miscDetail.Id.ToString(),
                     TransactionType = "Miscellaneous Issue",
                     Status = "",
@@ -1787,30 +1800,34 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     CIPNo = "",
                     Helpdesk = 0,
                     Rush = ""
-                })
-                .ToList();
+                });
 
             var transformConsol = _context.Transformation_Preparation
                 .AsNoTracking()
-                .Where(t => t.IsActive)
+                .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
+                .SelectMany(
+                    x => x.w.DefaultIfEmpty(),
+                    (x, w) => new { m = x.m, w })
+                .Join(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p.m, p.w, po })
+                .Where(t => t.m.IsActive && t.m.PreparedDate >= dateFrom && t.m.PreparedDate <= dateTo)
                 .Select(x => new ConsolidateAuditReportDto
                 {
-                    Id = x.Id,
-                    TransactionDate = x.PreparedDate.Date.ToString(),
-                    ItemCode = x.ItemCode,
-                    ItemDescription = x.ItemDescription,
+                    Id = x.m.Id,
+                    TransactionDate = x.m.PreparedDate.Date.ToString(),
+                    ItemCode = x.m.ItemCode,
+                    ItemDescription = x.m.ItemDescription,
                     Uom = "KG",
                     Category = "",
-                    Quantity = -Math.Round(x.QuantityNeeded, 2),
-                    UnitCost = "",
-                    LineAmount = "",
-                    Source = x.Id.ToString(),
-                    TransactionType = "",
+                    Quantity = Math.Round(x.m.QuantityNeeded, 2),
+                    UnitCost = x.po.UnitPrice,
+                    LineAmount = x.po.UnitPrice * (Math.Round(x.m.QuantityNeeded, 2)),
+                    Source = x.m.Id.ToString(),
+                    TransactionType = "Transformation",
                     Status = "",
                     Reason = "",
                     Reference = "",
                     SupplierName = "",
-                    EncodedBy = x.PreparedBy,
+                    EncodedBy = x.m.PreparedBy,
                     CompanyCode = "",
                     CompanyName = "",
                     DepartmentCode = "",
@@ -1820,7 +1837,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     AccountTitleCode = "",
                     AccountTitle = "",
                     EmpId = "",
-                    Fullname = x.PreparedBy,
+                    Fullname = x.m.PreparedBy,
                     AssetTag = "",
                     CIPNo = "",
                     Helpdesk = 0,
