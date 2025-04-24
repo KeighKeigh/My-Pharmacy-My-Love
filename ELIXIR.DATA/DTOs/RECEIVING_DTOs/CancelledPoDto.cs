@@ -19,6 +19,7 @@ namespace ELIXIR.DATA.DTOs.RECEIVING_DTOs
         public string DateCancelled { get; set; }
         public string Remarks { get; set; }
         public bool IsActive { get; set; }
+        public string Ymir_PO_Number { get; set; }
 
 
 

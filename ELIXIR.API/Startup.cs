@@ -112,6 +112,13 @@ namespace ELIXIR.API
             });
 
             services.AddControllers();
+
+            ////kestrell
+            //services.WebHost.ConfigureKestrel(serverOptions =>
+            //{
+            //    serverOptions.ListenAnyIP(5000); // HTTP
+            //    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

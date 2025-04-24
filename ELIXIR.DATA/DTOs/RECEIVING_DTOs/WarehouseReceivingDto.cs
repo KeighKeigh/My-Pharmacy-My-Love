@@ -31,7 +31,8 @@ namespace ELIXIR.DATA.DTOs.RECEIVING_DTOs
         public bool IsExpiryApprove { get; set; }
         public string ManufacturingDate { get; set; }
         public string ReceivingDate { get; set; }
-
+        public string Ymir_PO_Number { get; set; }
+        public string Ymir_PR_Number { get; set; }
 
 
 

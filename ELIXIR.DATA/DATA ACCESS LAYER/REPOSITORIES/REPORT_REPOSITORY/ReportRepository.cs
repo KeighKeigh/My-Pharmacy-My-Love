@@ -2219,7 +2219,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             //         ItemCode = x.ItemCode,
             //         UnitCost = x.UnitCost,
             //         ActualGood = x.ActualGood
-            //     });
+            //     });  
 
             var getMoveOrderOutid = _context.MoveOrders
                 .Where(x => x.PreparedDate.HasValue && x.PreparedDate.Value.Date >= dateFromParsed && x.PreparedDate.Value.Date <= dateToParsed &&

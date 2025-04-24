@@ -333,7 +333,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
 
                                    select new PGLResult
                                    {
-                                       SyncId = m.Id.ToString(),
+                                       SyncId = "MO-" + m.Id.ToString(),
                                        TransactionDate = t.PreparedDate,
                                        PONumber = w.PO_Number.ToString(),
                                        RRNumber = "0",
@@ -391,7 +391,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 .Where(x => x.warehouse.IsActive == true && x.warehouse.TransactionType == "MiscellaneousReceipt")
                 .Select(x => new PGLResult
                 {
-                    SyncId = x.warehouse.Id.ToString(),
+                    SyncId = "MR-" + x.warehouse.Id.ToString(),
                     TransactionDate = x.receipt.TransactionDate,
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
@@ -429,8 +429,9 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
             {
 
 
-                var result = _context.MiscellaneousIssues.AsNoTracking()
-                .GroupJoin(
+                var result = _context.MiscellaneousIssues
+                .AsNoTracking()
+                   .GroupJoin(
                     _context.MiscellaneousIssueDetails,
                     miscDetail => miscDetail.Id,
                     issue => issue.IssuePKey,
@@ -439,20 +440,25 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                     x => x.issues.DefaultIfEmpty(),
                     (x, issue) => new { miscDetail = x.miscDetail, issue }
                 )
-                //.GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
-                //.SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
 
-                //.GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new {warehouse, posummary })
-                //.SelectMany(x => x.posummary.DefaultIfEmpty(),
-                //(x, posummary) => new{x.warehouse.miscDetail,x.warehouse.issue,x.warehouse.ware,posummary })
-                //.Where(x => x.posummary != null)
+                .GroupJoin(_context.WarehouseReceived, misc => misc.issue.WarehouseId, ware => ware.Id, (misc, wareh) => new { misc.miscDetail, misc.issue, wareh })
+                .SelectMany(x => x.wareh.DefaultIfEmpty(), (x, ware) => new { x.miscDetail, x.issue, ware })
 
-                .Where(x => x.issue == null || x.issue.IsActive == true) 
+                .GroupJoin(_context.POSummary, warehouse => warehouse.ware.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
+                .SelectMany(x => x.posummary.DefaultIfEmpty(),
+                (x, posummary) => new { x.warehouse.miscDetail, x.warehouse.issue, x.warehouse.ware, posummary })
+                .GroupJoin(_context.RawMaterials, warehouse => warehouse.ware.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
+                .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.miscDetail, x.warehouse.issue, x.warehouse.ware, x.warehouse.posummary, rawmaterials })
+                .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
+                .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.miscDetail, x.rawmaterials.issue, x.rawmaterials.ware, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
+                .Where(x => x.posummary != null)
+
+                .Where(x => x.issue == null || x.issue.IsActive == true)
                 .Where(x => x.miscDetail.TransactionDate >= startDate && x.miscDetail.TransactionDate < endDate)
                 .Select(x => new PGLResult
                 {
                     
-                    SyncId = x.issue.Id.ToString(),
+                    SyncId = "MI-" + x.issue.Id.ToString(),
                     TransactionDate = x.miscDetail.TransactionDate,
                     ItemCode = x.issue.ItemCode,
                     ItemDescription = x.issue.ItemDescription,
@@ -497,19 +503,24 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 .SelectMany(
                     x => x.w.DefaultIfEmpty(),
                     (x, w) => new { m = x.m, w })
-                .Join(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p.m, p.w, po })
+                .GroupJoin(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p, po })
+                .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new { x.p.m, x.p.w, posummary })
+                .GroupJoin(_context.RawMaterials, warehouse => warehouse.w.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
+                .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
+                .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
+                .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
                 .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate && t.m.PreparedDate < endDate)
                 .Select(x => new PGLResult
                 {
-                    SyncId = x.m.Id.ToString(),
+                    SyncId = "T-" + x.m.Id.ToString(),
                     TransactionDate = x.m.PreparedDate,
                     ItemCode = x.m.ItemCode,
                     ItemDescription = x.m.ItemDescription,
                     UOM = "KG",
                     PONumber = "",
                     Quantity = Math.Round(x.m.QuantityNeeded, 2),
-                    UnitPrice = x.po.UnitPrice,
-                    LineAmount = (Math.Round(x.m.QuantityNeeded, 2)) * x.po.UnitPrice,
+                    UnitPrice = x.posummary.UnitPrice,
+                    LineAmount = (Math.Round(x.m.QuantityNeeded, 2)) * x.posummary.UnitPrice,
                     //Source = x.Id.ToString(),
                     CheckingRemarks = "Transformation",
                     //Status = "",

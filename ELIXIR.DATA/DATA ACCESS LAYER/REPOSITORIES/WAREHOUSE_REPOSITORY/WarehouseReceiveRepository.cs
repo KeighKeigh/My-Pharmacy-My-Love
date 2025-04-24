@@ -538,7 +538,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                    ItemDescription = posummary.ItemDescription,
                                    Supplier = posummary.VendorName,
                                    Uom = posummary.UOM,
-                                   QuantityOrderded = posummary.Ordered
+                                   QuantityOrderded = posummary.Ordered,
+                                   Ymir_PO_Number = posummary.Ymir_PO_Number
                                });
 
             var warehousereject =  (from warehouse in _context.WarehouseReceived
@@ -567,7 +568,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                        warehouse.Reason,
                                        warehouse.ConfirmRejectbyQc,
                                        warehouse.ConfirmRejectbyWarehouse,
-                                       warehouse.IsWarehouseReceive
+                                       warehouse.IsWarehouseReceive,
+                                       qc.Ymir_PO_Number
 
                                    } into total
 
@@ -587,7 +589,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                        Remarks = total.Key.Reason,
                                        ConfirmRejectByQc = total.Key.ConfirmRejectbyQc,
                                        ConfirmRejectByWarehouse = total.Key.ConfirmRejectbyWarehouse,
-                                       IsWarehouseReceived = total.Key.IsWarehouseReceive
+                                       IsWarehouseReceived = total.Key.IsWarehouseReceive,
+                                       Ymir_PO_Number = total.Key.Ymir_PO_Number
 
                                    }); 
 
@@ -607,7 +610,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                    ItemDescription = posummary.ItemDescription,
                                    Supplier = posummary.VendorName,
                                    Uom = posummary.UOM,
-                                   QuantityOrderded = posummary.Ordered
+                                   QuantityOrderded = posummary.Ordered,
+                                   Ymir_PO_Number = posummary.Ymir_PO_Number
+                                   
                                });
 
 
@@ -637,7 +642,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                        warehouse.Reason,
                                        warehouse.ConfirmRejectbyQc,
                                        warehouse.ConfirmRejectbyWarehouse,
-                                       warehouse.IsWarehouseReceive
+                                       warehouse.IsWarehouseReceive,
+                                       qc.Ymir_PO_Number
 
                                    } into total
 
@@ -657,7 +663,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                        Remarks = total.Key.Reason,
                                        ConfirmRejectByQc = total.Key.ConfirmRejectbyQc,
                                        ConfirmRejectByWarehouse = total.Key.ConfirmRejectbyWarehouse,
-                                       IsWarehouseReceived = total.Key.IsWarehouseReceive
+                                       IsWarehouseReceived = total.Key.IsWarehouseReceive,
+                                       Ymir_PO_Number = total.Key.Ymir_PO_Number
 
                                    }).Where(x => Convert.ToString(x.PO_Number).ToLower()
                                      .Contains(search.Trim().ToLower()));

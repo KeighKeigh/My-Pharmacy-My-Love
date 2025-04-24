@@ -16,9 +16,20 @@ namespace ELIXIR.API
            
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.ConfigureKestrel(serverOptions =>
+                {
+                    serverOptions.ListenAnyIP(6000); // HTTP
+                    serverOptions.ListenAnyIP(6001, listenOptions =>
+                    {
+                        listenOptions.UseHttps(); // HTTPS
+                    });
+                });
                     webBuilder.UseStartup<Startup>();
 
                 });
+
+
+
     }
 }
 

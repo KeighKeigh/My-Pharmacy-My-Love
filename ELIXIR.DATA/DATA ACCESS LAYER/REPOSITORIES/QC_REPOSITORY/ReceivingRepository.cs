@@ -592,7 +592,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  IsActive = posummary.IsActive,
                                  IsQcReceiveIsActive = receive != null && receive.IsActive != false ? receive.IsActive : true,
                                  ActualRemaining = 0,
-                                 Ymir_PO_Number = posummary.Ymir_PO_Number
+                                 Ymir_PO_Number = posummary.Ymir_PO_Number,
+                                 Ymir_PR_Number = posummary.Ymir_PR_Number
 
                              }).GroupBy(x => new
                              {
@@ -608,7 +609,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  x.QuantityOrdered,
                                  x.IsActive,
                                  x.IsQcReceiveIsActive,
-                                 x.Ymir_PO_Number
+                                 x.Ymir_PO_Number,
+                                 x.Ymir_PR_Number
                              })
                                                     .Select(receive => new PoSummaryChecklistDto
                                                     {
@@ -626,7 +628,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                         ActualRemaining = receive.Key.QuantityOrdered - (receive.Sum(x => x.ActualGood)),
                                                         IsActive = receive.Key.IsActive,
                                                         IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive,
-                                                        Ymir_PO_Number = receive.Key.Ymir_PO_Number
+                                                        Ymir_PO_Number = receive.Key.Ymir_PO_Number,
+                                                        Ymir_PR_Number = receive.Key.Ymir_PR_Number
 
                                                     })
                                                     .OrderBy(x => x.PO_Number)
@@ -661,7 +664,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  IsActive = posummary.IsActive,
                                  IsQcReceiveIsActive = receive != null && receive.IsActive != false ? receive.IsActive : true,
                                  ActualRemaining = 0,
-                                 Ymir_PO_Number = posummary.Ymir_PO_Number
+                                 Ymir_PO_Number = posummary.Ymir_PO_Number,
+                                 Ymir_PR_Number = posummary.Ymir_PR_Number
 
                              }).GroupBy(x => new
                              {
@@ -677,7 +681,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  x.QuantityOrdered,
                                  x.IsActive,
                                  x.IsQcReceiveIsActive,
-                                 x.Ymir_PO_Number
+                                 x.Ymir_PO_Number,
+                                 x.Ymir_PR_Number
                              })
                                                     .Select(receive => new PoSummaryChecklistDto
                                                     {
@@ -695,7 +700,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                                         ActualRemaining = receive.Key.QuantityOrdered - (receive.Sum(x => x.ActualGood)),
                                                         IsActive = receive.Key.IsActive,
                                                         IsQcReceiveIsActive = receive.Key.IsQcReceiveIsActive,
-                                                        Ymir_PO_Number = receive.Key.Ymir_PO_Number
+                                                        Ymir_PO_Number = receive.Key.Ymir_PO_Number,
+                                                        Ymir_PR_Number = receive.Key.Ymir_PR_Number
+
 
                                                     })
                                                       .OrderBy(x => x.PO_Number)
@@ -729,7 +736,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  IsActive = receive.IsActive,
                                  IsWareHouseReceive = receive.IsWareHouseReceive != null,
                                  IsExpiryApprove = receive.ExpiryIsApprove != null,
-                                 ManufacturingDate = receive.Manufacturing_Date.ToString("MM/dd/yyyy")
+                                 ManufacturingDate = receive.Manufacturing_Date.ToString("MM/dd/yyyy"),
+                                 Ymir_PO_Number = posummary.Ymir_PO_Number,
+                                 Ymir_PR_Number = posummary.Ymir_PR_Number
 
                              }).OrderBy(x => x.PO_Number)
                                .Where(x => x.IsWareHouseReceive == false)
@@ -762,7 +771,10 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                  IsActive = receive.IsActive,
                                  IsWareHouseReceive = receive.IsWareHouseReceive != null,
                                  IsExpiryApprove = receive.ExpiryIsApprove != null,
-                                 ManufacturingDate = receive.Manufacturing_Date.ToString("MM/dd/yyyy")
+                                 ManufacturingDate = receive.Manufacturing_Date.ToString("MM/dd/yyyy"),
+                                 Ymir_PO_Number = posummary.Ymir_PO_Number,
+                                 Ymir_PR_Number = posummary.Ymir_PR_Number
+
 
 
                              }).OrderBy(x => x.PO_Number)
@@ -794,7 +806,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                 QuantityGood = receive != null ? receive.Actual_Delivered : 0,
                                 DateCancelled = posummary.Date_Cancellation.ToString(),
                                 Remarks = posummary.Reason,
-                                IsActive = posummary.IsActive
+                                IsActive = posummary.IsActive,
+                                Ymir_PO_Number = posummary.Ymir_PO_Number
                             }).Where(x => x.IsActive == false)
                               .Where(x => x.DateCancelled != null)
                               .Where(x => x.Remarks != null);
@@ -822,7 +835,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                 QuantityGood = receive != null ? receive.Actual_Delivered : 0,
                                 DateCancelled = posummary.Date_Cancellation.ToString(),
                                 Remarks = posummary.Reason,
-                                IsActive = posummary.IsActive
+                                IsActive = posummary.IsActive,
+                                Ymir_PO_Number = posummary.Ymir_PO_Number
                             }).Where(x => x.IsActive == false)
                               .Where(x => x.DateCancelled != null)
                               .Where(x => x.Remarks != null)
@@ -857,7 +871,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                               IsActive = receiving.IsActive,
                               IsNearlyExpire = receiving.IsNearlyExpire != null,
                               ExpiryIsApprove = receiving.ExpiryIsApprove != null,
-                              ReceivingId = receiving.Id
+                              ReceivingId = receiving.Id,
+                              Ymir_PO_Number = summary.Ymir_PO_Number
 
                           }).Where(x => x.IsNearlyExpire == true)
                             .Where(x => x.ExpiryIsApprove == false);
@@ -892,7 +907,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                               IsActive = receiving.IsActive,
                               IsNearlyExpire = receiving.IsNearlyExpire != null,
                               ExpiryIsApprove = receiving.ExpiryIsApprove != null,
-                              ReceivingId = receiving.Id
+                              ReceivingId = receiving.Id,
+                              Ymir_PO_Number = summary.Ymir_PO_Number
 
                           }).Where(x => x.IsNearlyExpire == true)
                             .Where(x => x.ExpiryIsApprove == false)
@@ -914,7 +930,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                               ItemDescription = posummary.ItemDescription,
                               Supplier = posummary.VendorName,
                               Uom = posummary.UOM,
-                              QuantityOrderded = posummary.Ordered
+                              QuantityOrderded = posummary.Ordered,
+                              Ymir_PO_Number = posummary.Ymir_PO_Number
                           }).Join(_context.WarehouseReceived,
                                         reject => reject.Id,
                                         warehouse => warehouse.QcReceivingId,
@@ -932,7 +949,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                            IsWarehouseReceived = warehouse.IsWarehouseReceive,
                                            Remarks = warehouse.Reason,
                                            ConfirmRejectByWarehouse = warehouse.ConfirmRejectbyWarehouse,
-                                           ConfirmRejectByQc = warehouse.ConfirmRejectbyQc
+                                           ConfirmRejectByQc = warehouse.ConfirmRejectbyQc,
+                                           Ymir_PO_Number = reject.Ymir_PO_Number
 
                                        }).Where(x => x.IsWarehouseReceived == true)
                                          .Where(x => x.ConfirmRejectByWarehouse == true)
@@ -954,7 +972,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                               ItemDescription = posummary.ItemDescription,
                               Supplier = posummary.VendorName,
                               Uom = posummary.UOM,
-                              QuantityOrderded = posummary.Ordered
+                              QuantityOrderded = posummary.Ordered,
+                              Ymir_PO_Number = posummary.Ymir_PO_Number
                           }).Join(_context.WarehouseReceived,
                                        reject => reject.Id,
                                        warehouse => warehouse.QcReceivingId,
@@ -972,7 +991,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                           IsWarehouseReceived = warehouse.IsWarehouseReceive,
                                           Remarks = warehouse.Reason,
                                           ConfirmRejectByWarehouse = warehouse.ConfirmRejectbyWarehouse,
-                                          ConfirmRejectByQc = warehouse.ConfirmRejectbyQc
+                                          ConfirmRejectByQc = warehouse.ConfirmRejectbyQc,
+                                          Ymir_PO_Number = reject.Ymir_PO_Number
 
                                       }).Where(x => x.IsWarehouseReceived == true)
                                         .Where(x => x.ConfirmRejectByWarehouse == true)

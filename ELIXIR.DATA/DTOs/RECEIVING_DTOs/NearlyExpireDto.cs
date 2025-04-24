@@ -57,6 +57,7 @@ namespace ELIXIR.DATA.DTOs.RECEIVING_DTOs
 
         public bool QAApproval { get; set; }
         public string QAApprovalRemarks { get; set; }
+        public string Ymir_PO_Number { get; set; }
 
 
 
