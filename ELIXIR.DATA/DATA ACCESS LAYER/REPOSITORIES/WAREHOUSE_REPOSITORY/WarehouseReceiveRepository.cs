@@ -667,7 +667,10 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                        Ymir_PO_Number = total.Key.Ymir_PO_Number
 
                                    }).Where(x => Convert.ToString(x.PO_Number).ToLower()
+                                     .Contains(search.Trim().ToLower()))
+                                   .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower()
                                      .Contains(search.Trim().ToLower()));
+
 
             return await PagedList<RejectWarehouseReceivingDto>.CreateAsync(warehousereject, userParams.PageNumber, userParams.PageSize);
 

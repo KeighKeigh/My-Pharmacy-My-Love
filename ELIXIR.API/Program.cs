@@ -20,9 +20,9 @@ namespace ELIXIR.API
                 {
                     serverOptions.ListenAnyIP(6000); // HTTP
                     serverOptions.ListenAnyIP(6001, listenOptions =>
-                    {
-                        listenOptions.UseHttps(); // HTTPS
-                    });
+                    
+                        listenOptions.UseHttps()); // HTTPS
+                    
                 });
                     webBuilder.UseStartup<Startup>();
 

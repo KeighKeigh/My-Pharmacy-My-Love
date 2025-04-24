@@ -781,8 +781,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                .Where(x => x.IsWareHouseReceive == false)
                                .Where(x => x.IsExpiryApprove == true)
                                .Where(x => x.IsActive == true)
-                               .Where(x => Convert.ToString(x.PO_Number).ToLower()
-                               .Contains(search.Trim().ToLower()));
+                               .Where(x => Convert.ToString(x.PO_Number).ToLower().Contains(search.Trim().ToLower()))
+                               .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower().Contains(search.Trim().ToLower()));
 
             return await PagedList<WarehouseReceivingDto>.CreateAsync(warehouse, userParams.PageNumber, userParams.PageSize);
         }
@@ -841,7 +841,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                               .Where(x => x.DateCancelled != null)
                               .Where(x => x.Remarks != null)
                               .Where(x => Convert.ToString(x.PO_Number).ToLower()
-                              .Contains(search.Trim().ToLower()));
+                              .Contains(search.Trim().ToLower()))
+                              .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower().Contains(search.Trim().ToLower()));
 
 
             return await PagedList<CancelledPoDto>.CreateAsync(cancelpo, userParams.PageNumber, userParams.PageSize);
@@ -913,7 +914,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                           }).Where(x => x.IsNearlyExpire == true)
                             .Where(x => x.ExpiryIsApprove == false)
                             .Where(x => Convert.ToString(x.PO_Number).ToLower()
-                            .Contains(search.Trim().ToLower()));
+                            .Contains(search.Trim().ToLower()))
+                            .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower().Contains(search.Trim().ToLower()));
 
             return await PagedList<NearlyExpireDto>.CreateAsync(expiry, userParams.PageNumber, userParams.PageSize);
         }
@@ -998,7 +1000,10 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                         .Where(x => x.ConfirmRejectByWarehouse == true)
                                         .Where(x => x.ConfirmRejectByQc == true)
                                         .Where(x => Convert.ToString(x.PO_Number).ToLower()
-                                        .Contains(search.Trim().ToLower()));
+
+                                        .Contains(search.Trim().ToLower()))
+                                        .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower()
+                                     .Contains(search.Trim().ToLower()));
 
             return await PagedList<RejectWarehouseReceivingDto>.CreateAsync(reject, userParams.PageNumber, userParams.PageSize);
 
