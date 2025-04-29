@@ -25,6 +25,8 @@ namespace ELIXIR.DATA.DTOs.WAREHOUSE_DTOs
         public bool ExpiryIsApprove { get; set; }
         public decimal ExpectedDelivery { get; set; }
         public decimal TotalReject { get; set; }
+        public string Ymir_PO_Number { get; set; }
+        public string Ymir_PR_Number { get; set; }
 
 
     }

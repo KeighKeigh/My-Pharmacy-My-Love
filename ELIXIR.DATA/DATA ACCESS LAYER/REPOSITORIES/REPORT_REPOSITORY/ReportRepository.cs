@@ -1359,7 +1359,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                       TransactionType = "Move Order",
                                       Reason = "",
                                       Reference = m.OrderNo.ToString(),
-                                      SupplierName = "",
+                                      SupplierName = w.Supplier,
                                       EncodedBy = t.PreparedBy,
                                       CompanyCode = m.CompanyCode,
                                       CompanyName = m.CompanyName,
@@ -1367,10 +1367,22 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                       DepartmentName = m.DepartmentName,
                                       LocationCode = m.LocationCode,
                                       LocationName = m.LocationName,
-                                      AccountTitle = "Inventory Transfer",
-                                      AccountTitleCode = "115999",
+                                      AccountTitle = m.Category == "DISINFECTANT"
+                                       || m.Category == "SOLUBLE ANTIBIOTICS"
+                                       || m.Category == "SUPPLIMENTS"
+                                       || m.Category == "ORAL PREPARATION"
+                                       || m.Category == "VACCINE POULTRY"
+                                       || m.Category == "VACCINE SWINE"
+                                       || m.Category == "INJECTABLES" ? "Inventory Transfer" : "COS - Farm Supplies",
+                                      AccountTitleCode = m.Category == "DISINFECTANT"
+                                       || m.Category == "SOLUBLE ANTIBIOTICS"
+                                       || m.Category == "SUPPLIMENTS"
+                                       || m.Category == "ORAL PREPARATION"
+                                       || m.Category == "VACCINE POULTRY"
+                                       || m.Category == "VACCINE SWINE"
+                                       || m.Category == "INJECTABLES" ? "115999" : "510007",
                                       EmpId = "",
-                                      Fullname = "",
+                                      Fullname = u.FullName,
                                       AssetTag = "",
                                       CIPNo = "",
                                       Helpdesk = "",
@@ -1384,14 +1396,6 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .GroupJoin(_context.WarehouseReceived, r => r.Id, w => w.MiscellaneousReceiptId,
                     (receipt, warehouse) => new { receipt, warehouse })
                 .SelectMany(x => x.warehouse.DefaultIfEmpty(), (x, warehouse) => new { x.receipt, warehouse })
-                //.GroupJoin(_context.POSummary, warehouse => warehouse.warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary })
-                //.SelectMany(x => x.posummary.DefaultIfEmpty(), (x, posummary) => new { x.warehouse.receipt, x.warehouse.warehouse, posummary })
-                //.GroupJoin(_context.RawMaterials, warehouse => warehouse.warehouse.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
-                //.SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.receipt, x.warehouse.warehouse, x.warehouse.posummary, rawmaterials })
-                //.GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
-                //.SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.receipt, x.rawmaterials.warehouse, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
-                //.Where(x => x.posummary != null)
-
                 .Where(x => x.warehouse.IsActive && x.warehouse.TransactionType == "MiscellaneousReceipt")
                 .Select(x => new ConsolidateFinanceReportDto
                 {
@@ -1429,19 +1433,6 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
             var issueConsol = _context.MiscellaneousIssues
                 .AsNoTracking()
-                   //.GroupJoin(
-                   //    _context.MiscellaneousIssueDetails,
-                   //    miscDetail => miscDetail.Id,
-                   //    issueDetail => issueDetail.IssuePKey,
-                   //    (miscDetail, issueDetails) => new { miscDetail, issueDetails }
-                   //)
-                   //.SelectMany(
-                   //    x => x.issueDetails.DefaultIfEmpty(),
-                   //    (x, issueDetail) => new { x.miscDetail, issueDetail }
-                   //)
-                   //.Where(x => x.issueDetail == null || x.issueDetail.IsActive)
-                   //.Select(x => new
-
 
                    .GroupJoin(
                     _context.MiscellaneousIssueDetails,
@@ -1483,7 +1474,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     TransactionType = "Miscellaneous Issue",
                     Reason = x.issue.Remarks ,
                     Reference = x.miscDetail.Details,
-                    SupplierName = "",
+                    SupplierName = x.ware.Supplier,
                     EncodedBy = x.issue.PreparedBy,
                     CompanyCode = "",
                     CompanyName = "",
@@ -1530,7 +1521,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     TransactionType = "Transformation",
                     Reason = "",
                     Reference = "",
-                    SupplierName = "",
+                    SupplierName = x.w.Supplier,
                     EncodedBy = x.m.PreparedBy,
                     CompanyCode = "",
                     CompanyName = "",

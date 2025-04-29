@@ -327,7 +327,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                                    
 
 
-                              where t.PreparedDate >= startDate && t.PreparedDate < endDate && m.IsTransact == true
+                              where t.PreparedDate >= startDate.Date && t.PreparedDate < endDate && m.IsTransact == true
 
 
 
@@ -378,16 +378,10 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
             private async Task<List<PGLResult>> ReceiptTransactions(DateTime startDate, DateTime endDate)
             {
 
-                //var poSummaryDistinct = _context.POSummary.AsEnumerable()
-                //.GroupBy(p => p.ItemCode)
-                //.Select(g => g.FirstOrDefault()).ToList();
-                var poSummaryDistinct = _context.WarehouseReceived.AsNoTracking()
-                .Join(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse, posummary) => new { warehouse, posummary });
-
                 var result = _context.MiscellaneousReceipts
                 .GroupJoin(_context.WarehouseReceived, receipt => receipt.Id, warehouse => warehouse.MiscellaneousReceiptId, (receipt, warehouse) => new { receipt, warehouse })
                 .SelectMany(x => x.warehouse.DefaultIfEmpty(), (x, warehouse) => new { x.receipt, warehouse })
-                .Where(x => x.receipt.TransactionDate >= startDate && x.receipt.TransactionDate < endDate)
+                .Where(x => x.receipt.TransactionDate >= startDate.AddDays(1) && x.receipt.TransactionDate < endDate)
                 .Where(x => x.warehouse.IsActive == true && x.warehouse.TransactionType == "MiscellaneousReceipt")
                 .Select(x => new PGLResult
                 {
@@ -454,7 +448,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 .Where(x => x.posummary != null)
 
                 .Where(x => x.issue == null || x.issue.IsActive == true)
-                .Where(x => x.miscDetail.TransactionDate >= startDate && x.miscDetail.TransactionDate < endDate)
+                .Where(x => x.miscDetail.TransactionDate >= startDate.AddDays(1) && x.miscDetail.TransactionDate < endDate)
                 .Select(x => new PGLResult
                 {
                     
@@ -491,7 +485,6 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 
                 return await result.ToListAsync();
             }
-            //.Join(poSummaryDistinct, m => m.issue.ItemCode, po => po.ItemCode, (m, po) => new { m.miscDetail, m.issue, po })
             private async Task<List<PGLResult>> TransformTransactions(DateTime startDate, DateTime endDate)
             {
 
@@ -509,7 +502,7 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
                 .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
                 .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
-                .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate && t.m.PreparedDate < endDate)
+                .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate.AddDays(1) && t.m.PreparedDate < endDate)
                 .Select(x => new PGLResult
                 {
                     SyncId = "T-" + x.m.Id.ToString(),

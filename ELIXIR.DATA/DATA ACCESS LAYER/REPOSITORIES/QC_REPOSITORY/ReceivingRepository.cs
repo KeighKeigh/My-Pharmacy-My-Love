@@ -781,8 +781,10 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                .Where(x => x.IsWareHouseReceive == false)
                                .Where(x => x.IsExpiryApprove == true)
                                .Where(x => x.IsActive == true)
-                               .Where(x => Convert.ToString(x.PO_Number).ToLower().Contains(search.Trim().ToLower()))
-                               .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower().Contains(search.Trim().ToLower()));
+                               .Where(x =>(x.PO_Number != 0 && x.PO_Number.ToString().ToLower().Contains(search.Trim().ToLower())) ||
+                                     (x.Ymir_PO_Number != null && x.Ymir_PO_Number.ToLower().Contains(search.Trim().ToLower())));
+                               //.Where(x => Convert.ToString(x.PO_Number).ToLower().Contains(search.Trim().ToLower())) 
+                               //.Where(x => x.Ymir_PO_Number != null && x.Ymir_PO_Number.ToLower().Contains(search.Trim().ToLower()));
 
             return await PagedList<WarehouseReceivingDto>.CreateAsync(warehouse, userParams.PageNumber, userParams.PageSize);
         }
@@ -840,9 +842,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                             }).Where(x => x.IsActive == false)
                               .Where(x => x.DateCancelled != null)
                               .Where(x => x.Remarks != null)
-                              .Where(x => Convert.ToString(x.PO_Number).ToLower()
-                              .Contains(search.Trim().ToLower()))
-                              .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower().Contains(search.Trim().ToLower()));
+                              .Where(x => (x.PO_Number != 0 && x.PO_Number.ToString().ToLower().Contains(search.Trim().ToLower())) ||
+                                     (x.Ymir_PO_Number != null && x.Ymir_PO_Number.ToLower().Contains(search.Trim().ToLower())));
 
 
             return await PagedList<CancelledPoDto>.CreateAsync(cancelpo, userParams.PageNumber, userParams.PageSize);
@@ -913,9 +914,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
 
                           }).Where(x => x.IsNearlyExpire == true)
                             .Where(x => x.ExpiryIsApprove == false)
-                            .Where(x => Convert.ToString(x.PO_Number).ToLower()
-                            .Contains(search.Trim().ToLower()))
-                            .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower().Contains(search.Trim().ToLower()));
+                            .Where(x => (x.PO_Number != 0 && x.PO_Number.ToString().ToLower().Contains(search.Trim().ToLower())) ||
+                                     (x.Ymir_PO_Number != null && x.Ymir_PO_Number.ToLower().Contains(search.Trim().ToLower())));
 
             return await PagedList<NearlyExpireDto>.CreateAsync(expiry, userParams.PageNumber, userParams.PageSize);
         }
@@ -999,11 +999,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                       }).Where(x => x.IsWarehouseReceived == true)
                                         .Where(x => x.ConfirmRejectByWarehouse == true)
                                         .Where(x => x.ConfirmRejectByQc == true)
-                                        .Where(x => Convert.ToString(x.PO_Number).ToLower()
-
-                                        .Contains(search.Trim().ToLower()))
-                                        .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower()
-                                     .Contains(search.Trim().ToLower()));
+                                        .Where(x => (x.PO_Number != 0 && x.PO_Number.ToString().ToLower().Contains(search.Trim().ToLower())) ||
+                                     (x.Ymir_PO_Number != null && x.Ymir_PO_Number.ToLower().Contains(search.Trim().ToLower())));
 
             return await PagedList<RejectWarehouseReceivingDto>.CreateAsync(reject, userParams.PageNumber, userParams.PageSize);
 
@@ -1054,7 +1051,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.QC_REPOSITORY
                                CheckingApproval2 = receiving.Checking_Approval2,
                                CheckingApprovalRemarks2 = receiving.Checking_Approval2_Remarks,
                                QAApproval = receiving.QA_Approval,
-                               QAApprovalRemarks = receiving.QA_Approval_Remarks
+                               QAApprovalRemarks = receiving.QA_Approval_Remarks,
+                               Ymir_PO_Number = posummary.Ymir_PO_Number,
+                               Ymir_PR_Number = posummary.Ymir_PR_Number
                            });
 
             return await summary.Where(x => x.Id == id)

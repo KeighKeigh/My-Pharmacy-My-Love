@@ -10,6 +10,7 @@ using ELIXIR.DATA.DTOs.WAREHOUSE_DTOs;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,7 +57,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                  receive.Manufacturing_Date,
                                  receive.Expected_Delivery,
                                  receive.IsActive,
-                                 receive.TotalReject
+                                 receive.TotalReject,
+                                 posummary.Ymir_PO_Number,
+                                 posummary.Ymir_PR_Number
 
                              } into total
 
@@ -76,7 +79,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                  IsWarehouseReceived = total.Key.IsWareHouseReceive != null,
                                  ManufacturingDate = total.Key.Manufacturing_Date.ToString("MM/dd/yyyy"),
                                  ExpectedDelivery = total.Key.Expected_Delivery,
-                                 IsActive = total.Key.IsActive
+                                 IsActive = total.Key.IsActive,
+                                 Ymir_PO_Number = total.Key.Ymir_PO_Number,
+                                 Ymir_PR_Number = total.Key.Ymir_PR_Number
                                  
                              });
 
@@ -122,8 +127,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
             warehouse.Uom = scanbarcode.Uom;
             warehouse.ActualDelivered = scanbarcode.ActualDelivered;
             warehouse.QuantityGood = scanbarcode.ActualDelivered;
-            warehouse.ManufacturingDate = Convert.ToDateTime(scanbarcode.ManufacturingDate);
-            warehouse.Expiration = Convert.ToDateTime(scanbarcode.Expiration);
+            warehouse.ManufacturingDate = /*Convert.ToDateTime(scanbarcode.ManufacturingDate);*/ DateTime.ParseExact(scanbarcode.ManufacturingDate, "MM/dd/yyyy", CultureInfo.InvariantCulture);
+            warehouse.Expiration = /*Convert.ToDateTime(scanbarcode.Expiration);*/ DateTime.ParseExact(scanbarcode.Expiration, "MM/dd/yyyy", CultureInfo.InvariantCulture);
             warehouse.ExpirationDays = scanbarcode.ExpirationDays;
             warehouse.IsWarehouseReceive = true;
             warehouse.IsActive = true;
@@ -666,10 +671,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.WAREHOUSE_REPOSITORY
                                        IsWarehouseReceived = total.Key.IsWarehouseReceive,
                                        Ymir_PO_Number = total.Key.Ymir_PO_Number
 
-                                   }).Where(x => Convert.ToString(x.PO_Number).ToLower()
-                                     .Contains(search.Trim().ToLower()))
-                                   .Where(x => Convert.ToString(x.Ymir_PO_Number).ToLower()
-                                     .Contains(search.Trim().ToLower()));
+                                   }).Where(x => (x.PO_Number != 0 && x.PO_Number.ToString().ToLower().Contains(search.Trim().ToLower())) ||
+                                     (x.Ymir_PO_Number != null && x.Ymir_PO_Number.ToLower().Contains(search.Trim().ToLower())));
 
 
             return await PagedList<RejectWarehouseReceivingDto>.CreateAsync(warehousereject, userParams.PageNumber, userParams.PageSize);
