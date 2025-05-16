@@ -1493,52 +1493,136 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 });
 
 
-            var transformConsol = _context.Transformation_Preparation
-                .AsNoTracking()
-                .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
-                .SelectMany(
-                    x => x.w.DefaultIfEmpty(),
-                    (x, w) => new { m = x.m, w })
-                .GroupJoin(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p, po })
-                .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new {x.p.m, x.p.w, posummary })
-                .GroupJoin(_context.RawMaterials, warehouse => warehouse.w.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
-                .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
-                .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
-                .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
-                .Where(t => t.m.IsActive)
-                .Select(x => new ConsolidateFinanceReportDto
-                {
-                    Id = x.m.Id,
-                    TransactionDate = x.m.PreparedDate,
-                    ItemCode = x.m.ItemCode,
-                    ItemDescription = x.m.ItemDescription,
-                    Uom = "KG",
-                    Category = x.itemcategory.ItemCategoryName,
-                    Quantity = Math.Round(x.m.QuantityNeeded, 2),
-                    UnitCost = x.posummary.UnitPrice,
-                    LineAmount = x.posummary.UnitPrice * (Math.Round(x.m.QuantityNeeded, 2)),
-                    Source = "",
-                    TransactionType = "Transformation",
-                    Reason = "",
-                    Reference = "",
-                    SupplierName = x.w.Supplier,
-                    EncodedBy = x.m.PreparedBy,
-                    CompanyCode = "10",
-                    CompanyName = "RDF Corporate Services",
-                    DepartmentCode = "0010",
-                    DepartmentName = "Corporate Common",
-                    LocationCode = "0001",
-                    LocationName = "Head Office",
-                    AccountTitleCode = "115998",
-                    AccountTitle = "Materials & Supplies Inventory",
-                    EmpId = "",
-                    Fullname = "",
-                    AssetTag = "",
-                    CIPNo = "",
-                    Helpdesk = "",
-                    Rush = ""
-                });
+            //var transformConsol = _context.Transformation_Preparation
+            //    .AsNoTracking()
+            //    .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
+            //    .SelectMany(
+            //        x => x.w.DefaultIfEmpty(),
+            //        (x, w) => new { m = x.m, w })
+            //    .GroupJoin(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p, po })
+            //    .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new {x.p.m, x.p.w, posummary })
 
+            //    .GroupJoin(_context.RawMaterials, warehouse => warehouse.w.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
+            //    .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
+
+            //    .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
+            //    .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
+
+            //    .GroupJoin(_context.Transformation_Request, transprep => transprep.m.TransformId, transreq => transreq.TransformId, (transprep, transreq) => new {transprep, transreq })
+            //    .SelectMany(x => x.transreq.DefaultIfEmpty(), (x, tranreq) => new {x.transprep.m, x.transprep.w, x.transprep.posummary, x.transprep.rawmaterials, x.transprep.itemcategory, tranreq })
+
+            //    .GroupJoin(_context.Formulas, transreq => transreq.tranreq.Version, formula => formula.Version, (transreq, formula) => new { transreq, formula })
+            //    .SelectMany(x => x.formula.DefaultIfEmpty(), (x, formula) => new { x.transreq.m, x.transreq.w, x.transreq.posummary, x.transreq.rawmaterials, x.transreq.itemcategory, x.transreq.tranreq, formula })
+
+            //    .GroupJoin(_context.FormulaRequirements, formula => formula.formula.Id, formulareq => formulareq.TransformationFormulaId, (formula, formulareq) => new { formula, formulareq })
+            //    .SelectMany(x => x.formulareq.DefaultIfEmpty(), (x, formulareq) => new { x.formula.m, x.formula.w, x.formula.posummary, x.formula.rawmaterials, x.formula.itemcategory, x.formula.tranreq, x.formula.formula, formulareq })
+            //    .Where(t => t.m.IsActive)
+            //    .Select(x => new ConsolidateFinanceReportDto
+            //    {
+            //        Id = x.m.Id,
+            //        TransactionDate = x.m.PreparedDate,
+            //        ItemCode = x.m.ItemCode,
+            //        ItemDescription = x.m.ItemDescription,
+            //        Uom = "KG",
+            //        Category = x.itemcategory.ItemCategoryName,
+            //        Quantity = Math.Round(x.m.QuantityNeeded, 2),
+            //        UnitCost = x.posummary.UnitPrice,
+            //        LineAmount = x.posummary.UnitPrice * (Math.Round(x.m.QuantityNeeded, 2)),
+            //        Source = "",
+            //        TransactionType = "Transformation",
+            //        Reason = "",
+            //        Reference = "",
+            //        SupplierName = x.w.Supplier,
+            //        EncodedBy = x.m.PreparedBy,
+            //        CompanyCode = "10",
+            //        CompanyName = "RDF Corporate Services",
+            //        DepartmentCode = "0010",
+            //        DepartmentName = "Corporate Common",
+            //        LocationCode = "0001",
+            //        LocationName = "Head Office",
+            //        AccountTitleCode = "115998",
+            //        AccountTitle = "Materials & Supplies Inventory",
+            //        EmpId = "",
+            //        Fullname = "",
+            //        AssetTag = "",
+            //        CIPNo = "",
+            //        Helpdesk = "",
+            //        Rush = "",
+            //        Formula = string.Join(", ", x.formulareq.ItemDescription),
+            //    });
+
+            //test
+
+            var raw = (from m in _context.Transformation_Preparation.AsNoTracking()
+                       join w in _context.WarehouseReceived on m.WarehouseId equals w.Id into wj
+                       from w in wj.DefaultIfEmpty()
+
+                       join po in _context.POSummary on w.PO_Number equals po.PO_Number into poj
+                       from po in poj.DefaultIfEmpty()
+
+                       join rm in _context.RawMaterials on w.ItemCode equals rm.ItemCode into rmj
+                       from rm in rmj.DefaultIfEmpty()
+
+                       join cat in _context.ItemCategories on rm.ItemCategoryId equals cat.Id into catj
+                       from cat in catj.DefaultIfEmpty()
+
+                       join tr in _context.Transformation_Request on m.TransformId equals tr.TransformId into trj
+                       from tr in trj.DefaultIfEmpty()
+
+                       join f in _context.Formulas on tr.Version equals f.Version into fj
+                       from f in fj.DefaultIfEmpty()
+
+                       join fr in _context.FormulaRequirements on f.Id equals fr.TransformationFormulaId into frj
+                       from fr in frj.DefaultIfEmpty()
+
+                       where m.IsActive
+                       select new
+                       {
+                           m,
+                           w,
+                           po,
+                           rm,
+                           cat,
+                           tr,
+                           f,
+                           fr
+                       }).ToList();
+
+            var transformConsol = raw
+           .GroupBy(x => x.m.Id)
+           .Select(g => new ConsolidateFinanceReportDto
+           {
+               Id = g.Key,
+               TransactionDate = g.First().m.PreparedDate,
+               ItemCode = g.First().m.ItemCode,
+               ItemDescription = g.First().m.ItemDescription,
+               Uom = "KG",
+               Category = g.First().cat?.ItemCategoryName,
+               Quantity = Math.Round(g.First().m.QuantityNeeded, 2),
+               UnitCost = g.First().po?.UnitPrice ?? 0,
+               LineAmount = (g.First().po?.UnitPrice ?? 0) * Math.Round(g.First().m.QuantityNeeded, 2),
+               SupplierName = g.First().w?.Supplier,
+               EncodedBy = g.First().m.PreparedBy,
+               CompanyCode = "10",
+               CompanyName = "RDF Corporate Services",
+               DepartmentCode = "0010",
+               DepartmentName = "Corporate Common",
+               LocationCode = "0001",
+               LocationName = "Head Office",
+               AccountTitleCode = "115998",
+               AccountTitle = "Materials & Supplies Inventory",
+               TransactionType = "Transformation",
+               Formula = string.Join(", ",
+               g.Where(x => x.fr != null && !string.IsNullOrEmpty(x.fr.ItemDescription) && x.f.ItemCode == x.m.ItemCode && x.fr.TransformationFormulaId == x.f.Id)
+               .GroupBy(x => x.fr.TransformationFormulaId)
+               .SelectMany(grp => grp.Select(x => x.fr.ItemDescription)))
+
+           });
+
+
+
+
+            //test
 
             if (!string.IsNullOrEmpty(DateFrom) && !string.IsNullOrEmpty(DateTo))
             {
@@ -1572,7 +1656,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Concat(await moveOrderConsol.ToListAsync())
                 .Concat(await receiptConsol.ToListAsync())
                 .Concat(await issueConsol.ToListAsync())
-                .Concat(await transformConsol.ToListAsync());
+                .Concat( transformConsol.ToList());
 
             var reports = consolidateList.Select(consol => new ConsolidateFinanceReportDto
             {
@@ -1604,7 +1688,9 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 AssetTag = consol.AssetTag,
                 CIPNo = consol.CIPNo,
                 Helpdesk = consol.Helpdesk,
-                Rush = consol.Rush
+                Rush = consol.Rush,
+                Formula = consol.Formula
+                
             });
 
             if (!string.IsNullOrEmpty(Search))

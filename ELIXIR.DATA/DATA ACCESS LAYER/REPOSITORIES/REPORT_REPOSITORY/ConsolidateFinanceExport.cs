@@ -39,7 +39,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     {
                         "Id","Transaction Date","Item Code","Item Description","Uom","Category","Quantity","Unit Cost","Line Amount",
                         "Source","Transaction Type","Reason","Reference","Supplier Name","Encoded By","Company Code","Company Name","Department Code","Department Name",
-                        "Location Code","Location Name","Account Title Code","Account Title","EmpId","FullName","Asset Tag","Cip #", "Helpdesk","Rush"
+                        "Location Code","Location Name","Account Title Code","Account Title","EmpId","FullName","Formula","Asset Tag","Cip #", "Helpdesk"
 
                     };
 
@@ -96,10 +96,11 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                         row.Cell(23).Value = consolidate[index - 1].AccountTitle;
                         row.Cell(24).Value = consolidate[index - 1].EmpId;
                         row.Cell(25).Value = consolidate[index - 1].Fullname;
-                        row.Cell(26).Value = consolidate[index - 1].AssetTag;
-                        row.Cell(27).Value = consolidate[index - 1].CIPNo;
-                        row.Cell(28).Value = consolidate[index - 1].Helpdesk;
-                        row.Cell(29).Value = consolidate[index - 1].Rush;
+                        row.Cell(26).Value = consolidate[index - 1].Formula;
+                        row.Cell(27).Value = consolidate[index - 1].AssetTag;
+                        row.Cell(28).Value = consolidate[index - 1].CIPNo;
+                        row.Cell(29).Value = consolidate[index - 1].Helpdesk;
+                        
 
                     }
                     worksheet.Columns().AdjustToContents();

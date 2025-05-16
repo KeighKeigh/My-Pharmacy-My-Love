@@ -43,11 +43,12 @@ namespace ELIXIR.DATA.DTOs.REPORT_DTOs
         public string EmpId { get; set; }
         public string Fullname { get; set; }
 
+        public string Formula { get; set; }
 
         public string AssetTag { get; set; }
         public string CIPNo { get; set; }
         public string Helpdesk { get; set; }
-        //public string Remarks { get; set; }
+        public string Customer { get; set; }
         public string Rush { get; set; }
     }
 }
