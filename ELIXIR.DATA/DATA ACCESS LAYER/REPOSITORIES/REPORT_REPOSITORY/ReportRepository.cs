@@ -1331,6 +1331,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     CIPNo = "",
                     Helpdesk = "",
                     Rush = ""
+                    
                 }).ToList();
 
             var moveOrderConsol = from m in _context.MoveOrders
@@ -1387,6 +1388,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                       CIPNo = "",
                                       Helpdesk = "",
                                       Rush = "",
+                                      Customer = t.FarmName
                                   };
 
 
@@ -1500,7 +1502,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             //        x => x.w.DefaultIfEmpty(),
             //        (x, w) => new { m = x.m, w })
             //    .GroupJoin(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p, po })
-            //    .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new {x.p.m, x.p.w, posummary })
+            //    .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new { x.p.m, x.p.w, posummary })
 
             //    .GroupJoin(_context.RawMaterials, warehouse => warehouse.w.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
             //    .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
@@ -1508,15 +1510,12 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             //    .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
             //    .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
 
-            //    .GroupJoin(_context.Transformation_Request, transprep => transprep.m.TransformId, transreq => transreq.TransformId, (transprep, transreq) => new {transprep, transreq })
-            //    .SelectMany(x => x.transreq.DefaultIfEmpty(), (x, tranreq) => new {x.transprep.m, x.transprep.w, x.transprep.posummary, x.transprep.rawmaterials, x.transprep.itemcategory, tranreq })
+            //    .GroupJoin(_context.MoveOrders, itemcategory => itemcategory.w.ItemCode, moveorder => moveorder.ItemCode, (itemcategory, moveorder) => new { itemcategory, moveorder })
+            //    .SelectMany(x => x.moveorder.DefaultIfEmpty(), (x, moveorder) => new { x.itemcategory.m, x.itemcategory.w, x.itemcategory.posummary, x.itemcategory.rawmaterials, x.itemcategory.itemcategory, moveorder })
 
-            //    .GroupJoin(_context.Formulas, transreq => transreq.tranreq.Version, formula => formula.Version, (transreq, formula) => new { transreq, formula })
-            //    .SelectMany(x => x.formula.DefaultIfEmpty(), (x, formula) => new { x.transreq.m, x.transreq.w, x.transreq.posummary, x.transreq.rawmaterials, x.transreq.itemcategory, x.transreq.tranreq, formula })
+            //    .GroupJoin(_context.Formulas, transreq => transreq.moveorder.ItemCode, formula => formula.ItemCode, (transreq, formula) => new { transreq, formula })
+            //    .SelectMany(x => x.formula.DefaultIfEmpty(), (x, formula) => new { x.transreq.m, x.transreq.w, x.transreq.posummary, x.transreq.rawmaterials, x.transreq.itemcategory, x.transreq.moveorder, formula })
 
-            //    .GroupJoin(_context.FormulaRequirements, formula => formula.formula.Id, formulareq => formulareq.TransformationFormulaId, (formula, formulareq) => new { formula, formulareq })
-            //    .SelectMany(x => x.formulareq.DefaultIfEmpty(), (x, formulareq) => new { x.formula.m, x.formula.w, x.formula.posummary, x.formula.rawmaterials, x.formula.itemcategory, x.formula.tranreq, x.formula.formula, formulareq })
-            //    .Where(t => t.m.IsActive)
             //    .Select(x => new ConsolidateFinanceReportDto
             //    {
             //        Id = x.m.Id,
@@ -1548,7 +1547,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             //        CIPNo = "",
             //        Helpdesk = "",
             //        Rush = "",
-            //        Formula = string.Join(", ", x.formulareq.ItemDescription),
+            //        Formula = string.Join(", " x)
             //    });
 
             //test
@@ -1560,11 +1559,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                        join po in _context.POSummary on w.PO_Number equals po.PO_Number into poj
                        from po in poj.DefaultIfEmpty()
 
-                       join rm in _context.RawMaterials on w.ItemCode equals rm.ItemCode into rmj
-                       from rm in rmj.DefaultIfEmpty()
 
-                       join cat in _context.ItemCategories on rm.ItemCategoryId equals cat.Id into catj
-                       from cat in catj.DefaultIfEmpty()
+
 
                        join tr in _context.Transformation_Request on m.TransformId equals tr.TransformId into trj
                        from tr in trj.DefaultIfEmpty()
@@ -1574,6 +1570,12 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
                        join fr in _context.FormulaRequirements on f.Id equals fr.TransformationFormulaId into frj
                        from fr in frj.DefaultIfEmpty()
+
+                       join rm in _context.RawMaterials on fr.RawMaterialId equals rm.Id into rmj
+                       from rm in rmj.DefaultIfEmpty()
+
+                       join cat in _context.ItemCategories on rm.ItemCategoryId equals cat.Id into catj
+                       from cat in catj.DefaultIfEmpty()
 
                        where m.IsActive
                        select new
@@ -1613,9 +1615,18 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                AccountTitle = "Materials & Supplies Inventory",
                TransactionType = "Transformation",
                Formula = string.Join(", ",
-               g.Where(x => x.fr != null && !string.IsNullOrEmpty(x.fr.ItemDescription) && x.f.ItemCode == x.m.ItemCode && x.fr.TransformationFormulaId == x.f.Id)
-               .GroupBy(x => x.fr.TransformationFormulaId)
-               .SelectMany(grp => grp.Select(x => x.fr.ItemDescription)))
+        g.Where(x =>
+            x.fr != null &&
+            x.f != null &&
+            x.fr.TransformationFormulaId == x.f.Id &&
+            x.rm != null &&
+            x.cat != null &&
+            x.cat.Id == x.rm.ItemCategoryId &&
+            x.rm.Id == x.fr.RawMaterialId &&
+            x.m.ItemCode == x.f.ItemCode)
+         .Select(x => x.cat.ItemCategoryName)
+         .Distinct()
+    )
 
            });
 
@@ -1689,7 +1700,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 CIPNo = consol.CIPNo,
                 Helpdesk = consol.Helpdesk,
                 Rush = consol.Rush,
-                Formula = consol.Formula
+                Formula = consol.Formula,
+                Customer = consol.Customer
                 
             });
 

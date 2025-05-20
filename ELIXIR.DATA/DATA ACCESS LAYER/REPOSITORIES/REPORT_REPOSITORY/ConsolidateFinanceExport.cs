@@ -39,7 +39,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     {
                         "Id","Transaction Date","Item Code","Item Description","Uom","Category","Quantity","Unit Cost","Line Amount",
                         "Source","Transaction Type","Reason","Reference","Supplier Name","Encoded By","Company Code","Company Name","Department Code","Department Name",
-                        "Location Code","Location Name","Account Title Code","Account Title","EmpId","FullName","Formula","Asset Tag","Cip #", "Helpdesk"
+                        "Location Code","Location Name","Account Title Code","Account Title","EmpId","FullName","Formula","Asset Tag","Cip #", "Helpdesk", "Customer"
 
                     };
 
@@ -100,7 +100,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                         row.Cell(27).Value = consolidate[index - 1].AssetTag;
                         row.Cell(28).Value = consolidate[index - 1].CIPNo;
                         row.Cell(29).Value = consolidate[index - 1].Helpdesk;
-                        
+                        row.Cell(30).Value = consolidate[index - 1].Customer;
+
 
                     }
                     worksheet.Columns().AdjustToContents();
