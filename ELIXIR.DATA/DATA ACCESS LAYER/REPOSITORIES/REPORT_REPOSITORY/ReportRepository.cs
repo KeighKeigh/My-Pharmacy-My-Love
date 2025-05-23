@@ -1290,8 +1290,10 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
             return consolidateList.ToList();
         }
 
-        public async Task<IReadOnlyList<ConsolidateFinanceReportDto>> ConsolidateFinanceReport(string DateFrom, string DateTo, string Search)
+        public async Task<IReadOnlyList<ConsolidateFinanceReportDto>>ConsolidateFinanceReport(string DateFrom, string DateTo, string Search)
         {
+            var dateFrom = DateTime.Parse(DateFrom).Date;
+            var dateTo = DateTime.Parse(DateTo).Date;
             var receivingConsol = _context.WarehouseReceived
                 .AsNoTracking().GroupJoin(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse , posummary) => new {warehouse, posummary })
                 .SelectMany(x => x.posummary.DefaultIfEmpty(), (x, posummary) => new {x.warehouse, posummary})
@@ -1303,7 +1305,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateFinanceReportDto
                 {
                     Id = x.warehouse.Id,
-                    TransactionDate = x.warehouse.ReceivingDate,
+                    TransactionDate = x.warehouse.ReceivingDate.ToString("yyyy-MM-dd"),
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
                     Uom = x.warehouse.Uom,
@@ -1348,7 +1350,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                   select new ConsolidateFinanceReportDto
                                   {
                                       Id = t.Id,
-                                      TransactionDate = t.PreparedDate,
+                                      TransactionDate = t.PreparedDate.Value.ToString("yyyy-MM-dd"),
                                       ItemCode = m.ItemCode,
                                       ItemDescription = m.ItemDescription,
                                       Uom = m.Uom,
@@ -1402,7 +1404,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateFinanceReportDto
                 {
                     Id = x.warehouse.Id,
-                    TransactionDate = x.receipt.TransactionDate ,
+                    TransactionDate = x.receipt.TransactionDate.Value.ToString("yyyy-MM-dd"),
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
                     Uom = x.warehouse.Uom,
@@ -1464,7 +1466,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 ConsolidateFinanceReportDto
                 {
                     Id = x.issue.Id ,
-                    TransactionDate = x.miscDetail.TransactionDate ?? default(DateTime),
+                    TransactionDate = x.miscDetail.TransactionDate.Value.ToString("yyyy-MM-dd"),
                     ItemCode = x.issue.ItemCode ,
                     ItemDescription = x.issue.ItemDescription ,
                     Uom = x.issue.Uom,
@@ -1595,7 +1597,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
            .Select(g => new ConsolidateFinanceReportDto
            {
                Id = g.Key,
-               TransactionDate = g.First().m.PreparedDate,
+               TransactionDate = g.First().m.PreparedDate.ToString("yyyy-MM-dd"),
                ItemCode = g.First().m.ItemCode,
                ItemDescription = g.First().m.ItemDescription,
                Uom = "KG",
@@ -1635,33 +1637,33 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
             //test
 
-            if (!string.IsNullOrEmpty(DateFrom) && !string.IsNullOrEmpty(DateTo))
-            {
-                var dateFrom = DateTime.Parse(DateFrom).Date;
-                var dateTo = DateTime.Parse(DateTo).Date;
+            //if (!string.IsNullOrEmpty(DateFrom) && !string.IsNullOrEmpty(DateTo))
+            //{
+            //    var dateFrom = DateTime.Parse(DateFrom).Date;
+            //    var dateTo = DateTime.Parse(DateTo).Date;
 
-                receivingConsol = receivingConsol
-                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-                    .ToList()
-                    ;
+            //    receivingConsol = receivingConsol
+            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+            //        .ToList()
+            //        ;
 
-                moveOrderConsol = moveOrderConsol
-                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-                    ;
+            //    moveOrderConsol = moveOrderConsol
+            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+            //        ;
 
-                receiptConsol = receiptConsol
-                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-                    ;
+            //    receiptConsol = receiptConsol
+            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+            //        ;
 
-                issueConsol = issueConsol
-                     .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-                    ;
+            //    issueConsol = issueConsol
+            //         .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+            //        ;
 
-                transformConsol = transformConsol
-                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-                    ;
+            //    transformConsol = transformConsol
+            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+            //        ;
 
-            }
+            //}
 
             var consolidateList = receivingConsol
                 .Concat(await moveOrderConsol.ToListAsync())
@@ -1740,7 +1742,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateAuditReportDto
                 {
                     Id = x.warehouse.Id,
-                    TransactionDate = x.warehouse.ReceivingDate.Date.ToString(),
+                    TransactionDate = x.warehouse.ReceivingDate.ToString("yyyy-MM-dd"),
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
                     Uom = x.warehouse.Uom,
@@ -1787,7 +1789,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                   select new ConsolidateAuditReportDto
                                   {
                                       Id = t.Id,
-                                      TransactionDate = t.PreparedDate.Value.Date.ToString(),
+                                      TransactionDate = t.PreparedDate.Value.ToString("yyyy-MM-dd"),
                                       ItemCode = m.ItemCode,
                                       ItemDescription = m.ItemDescription,
                                       Uom = m.Uom,
@@ -1808,14 +1810,27 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                       DepartmentName = "Corporate Common",
                                       LocationCode = "0001",
                                       LocationName = "Head Office",
-                                      AccountTitleCode = m.AccountCode,
-                                      AccountTitle = "",
+                                      AccountTitle = m.Category == "DISINFECTANT"
+                                       || m.Category == "SOLUBLE ANTIBIOTICS"
+                                       || m.Category == "SUPPLIMENTS"
+                                       || m.Category == "ORAL PREPARATION"
+                                       || m.Category == "VACCINE POULTRY"
+                                       || m.Category == "VACCINE SWINE"
+                                       || m.Category == "INJECTABLES" ? "Inventory Transfer" : "COS - Farm Supplies",
+                                      AccountTitleCode = m.Category == "DISINFECTANT"
+                                       || m.Category == "SOLUBLE ANTIBIOTICS"
+                                       || m.Category == "SUPPLIMENTS"
+                                       || m.Category == "ORAL PREPARATION"
+                                       || m.Category == "VACCINE POULTRY"
+                                       || m.Category == "VACCINE SWINE"
+                                       || m.Category == "INJECTABLES" ? "115999" : "510007",
                                       EmpId = "",
                                       Fullname = m.PreparedBy,
                                       AssetTag = "",
                                       CIPNo = "",
                                       Helpdesk = 0,
-                                      Rush = ""
+                                      Rush = "",
+                                      Customer = t.FarmName
                                   };
 
 
@@ -1828,7 +1843,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateAuditReportDto
                 {
                     Id = x.warehouse.Id,
-                    TransactionDate = x.receipt.TransactionDate.Value.ToString(),
+                    TransactionDate = x.receipt.TransactionDate.Value.ToString("yyyy-MM-dd"),
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
                     Uom = x.warehouse.Uom,
@@ -1887,7 +1902,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateAuditReportDto
                 {
                     Id = x.issue.Id,
-                    TransactionDate = x.miscDetail.TransactionDate.Value.ToString(),
+                    TransactionDate = x.miscDetail.TransactionDate.Value.ToString("yyyy-MM-dd"),
                     ItemCode = x.issue.ItemCode,
                     ItemDescription = x.issue.ItemDescription,
                     Uom = x.issue.Uom,
@@ -1918,52 +1933,83 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Rush = ""
                 });
 
-            var transformConsol = _context.Transformation_Preparation
-                .AsNoTracking()
-                .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
-                .SelectMany(
-                    x => x.w.DefaultIfEmpty(),
-                    (x, w) => new { m = x.m, w })
-                .GroupJoin(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p, po })
-                .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new { x.p.m, x.p.w, posummary })
-                .GroupJoin(_context.RawMaterials, warehouse => warehouse.w.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
-                .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
-                .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
-                .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
-                .Where(t => t.m.IsActive && t.m.PreparedDate >= dateFrom && t.m.PreparedDate <= dateTo)
-                .Select(x => new ConsolidateAuditReportDto
-                {
-                    Id = x.m.Id,
-                    TransactionDate = x.m.PreparedDate.Date.ToString(),
-                    ItemCode = x.m.ItemCode,
-                    ItemDescription = x.m.ItemDescription,
-                    Uom = "KG",
-                    Category = x.itemcategory.ItemCategoryName,
-                    Quantity = Math.Round(x.m.QuantityNeeded, 2),
-                    UnitCost = x.posummary.UnitPrice,
-                    LineAmount = x.posummary.UnitPrice * (Math.Round(x.m.QuantityNeeded, 2)),
-                    Source = x.m.Id.ToString(),
-                    TransactionType = "Transformation",
-                    Status = "",
-                    Reason = "",
-                    Reference = "",
-                    SupplierName = "",
-                    EncodedBy = x.m.PreparedBy,
-                    CompanyCode = "10",
-                    CompanyName = "RDF Corporate Services",
-                    DepartmentCode = "0010",
-                    DepartmentName = "Corporate Common",
-                    LocationCode = "0001",
-                    LocationName = "Head Office",
-                    AccountTitleCode = "",
-                    AccountTitle = "",
-                    EmpId = "",
-                    Fullname = x.m.PreparedBy,
-                    AssetTag = "",
-                    CIPNo = "",
-                    Helpdesk = 0,
-                    Rush = ""
-                });
+            var raw = (from m in _context.Transformation_Preparation.AsNoTracking()
+                       join w in _context.WarehouseReceived on m.WarehouseId equals w.Id into wj
+                       from w in wj.DefaultIfEmpty()
+
+                       join po in _context.POSummary on w.PO_Number equals po.PO_Number into poj
+                       from po in poj.DefaultIfEmpty()
+
+
+
+
+                       join tr in _context.Transformation_Request on m.TransformId equals tr.TransformId into trj
+                       from tr in trj.DefaultIfEmpty()
+
+                       join f in _context.Formulas on tr.Version equals f.Version into fj
+                       from f in fj.DefaultIfEmpty()
+
+                       join fr in _context.FormulaRequirements on f.Id equals fr.TransformationFormulaId into frj
+                       from fr in frj.DefaultIfEmpty()
+
+                       join rm in _context.RawMaterials on fr.RawMaterialId equals rm.Id into rmj
+                       from rm in rmj.DefaultIfEmpty()
+
+                       join cat in _context.ItemCategories on rm.ItemCategoryId equals cat.Id into catj
+                       from cat in catj.DefaultIfEmpty()
+
+                       where m.IsActive
+                       select new
+                       {
+                           m,
+                           w,
+                           po,
+                           rm,
+                           cat,
+                           tr,
+                           f,
+                           fr
+                       }).ToList();
+
+            var transformConsol = raw
+           .GroupBy(x => x.m.Id)
+           .Select(g => new ConsolidateAuditReportDto
+           {
+               Id = g.Key,
+               TransactionDate = g.First().m.PreparedDate.ToString("yyyy-MM-dd"),
+               ItemCode = g.First().m.ItemCode,
+               ItemDescription = g.First().m.ItemDescription,
+               Uom = "KG",
+               Category = g.First().cat?.ItemCategoryName,
+               Quantity = Math.Round(g.First().m.QuantityNeeded, 2),
+               UnitCost = g.First().po?.UnitPrice ?? 0,
+               LineAmount = (g.First().po?.UnitPrice ?? 0) * Math.Round(g.First().m.QuantityNeeded, 2),
+               SupplierName = g.First().w?.Supplier,
+               EncodedBy = g.First().m.PreparedBy,
+               CompanyCode = "10",
+               CompanyName = "RDF Corporate Services",
+               DepartmentCode = "0010",
+               DepartmentName = "Corporate Common",
+               LocationCode = "0001",
+               LocationName = "Head Office",
+               AccountTitleCode = "115998",
+               AccountTitle = "Materials & Supplies Inventory",
+               TransactionType = "Transformation",
+               Formula = string.Join(", ",
+        g.Where(x =>
+            x.fr != null &&
+            x.f != null &&
+            x.fr.TransformationFormulaId == x.f.Id &&
+            x.rm != null &&
+            x.cat != null &&
+            x.cat.Id == x.rm.ItemCategoryId &&
+            x.rm.Id == x.fr.RawMaterialId &&
+            x.m.ItemCode == x.f.ItemCode)
+         .Select(x => x.cat.ItemCategoryName)
+         .Distinct()
+    )
+
+           });
 
             var cancelledConsol = _context.Orders
                  .Where(x => x.IsCancel == true).Where(x => (x.CancelDate.Value.Date >= DateTime.Parse(DateFrom).Date
@@ -1974,7 +2020,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateAuditReportDto
                 {
                     Id = x.Id,
-                    TransactionDate = x.CancelDate.Value.Date.ToString() != null ? x.CancelDate.Value.Date.ToString() : x.CancelDate.Value.Date.ToString(),
+                    TransactionDate = x.CancelDate.Value.ToString("yyyy-MM-dd") != null ? x.CancelDate.Value.ToString("yyyy-MM-dd") : x.CancelDate.Value.ToString("yyyy-MM-dd"),
                     ItemCode = x.ItemCode,
                     ItemDescription = x.ItemDescription,
                     Uom = x.Uom,
@@ -2043,10 +2089,12 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 AccountTitle = consol.AccountTitle,
                 EmpId = consol.EmpId,
                 Fullname = consol.Fullname,
+                Formula = consol.Formula,
                 AssetTag = consol.AssetTag,
                 CIPNo = consol.CIPNo,
                 Helpdesk = consol.Helpdesk,
-                Rush = consol.Rush
+                Rush = consol.Rush,
+                Customer = consol.Customer
             });
 
             if (!string.IsNullOrEmpty(Search))

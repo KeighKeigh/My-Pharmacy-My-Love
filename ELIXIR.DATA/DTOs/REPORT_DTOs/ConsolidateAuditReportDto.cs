@@ -42,5 +42,7 @@ namespace ELIXIR.DATA.DTOs.REPORT_DTOs
         public string CIPNo { get; set; }
         public int? Helpdesk { get; set; }
         public string Rush { get; set; }
+        public string Formula { get; set; }
+        public string Customer { get; set; }
     }
 }

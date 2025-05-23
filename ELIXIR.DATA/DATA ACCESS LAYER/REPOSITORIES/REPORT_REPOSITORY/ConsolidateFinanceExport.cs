@@ -37,9 +37,35 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
                     var headers = new List<string>
                     {
-                        "Id","Transaction Date","Item Code","Item Description","Uom","Category","Quantity","Unit Cost","Line Amount",
-                        "Source","Transaction Type","Reason","Reference","Supplier Name","Encoded By","Company Code","Company Name","Department Code","Department Name",
-                        "Location Code","Location Name","Account Title Code","Account Title","EmpId","FullName","Formula","Asset Tag","Cip #", "Helpdesk", "Customer"
+                        "Id",
+                        "Transaction Date",
+                        "Item Code",
+                        "Item Description",
+                        "Uom","Category",
+                        "Quantity",
+                        "Unit Cost",
+                        "Line Amount",
+                        "Source",
+                        "Transaction Type",
+                        "Reason",
+                        "Reference",
+                        "Supplier Name",
+                        "Encoded By",
+                        "Company Code",
+                        "Company Name",
+                        "Department Code",
+                        "Department Name",
+                        "Location Code",
+                        "Location Name",
+                        "Account Title Code",
+                        "Account Title",
+                        "EmpId",
+                        "FullName",
+                        "Formula Category",
+                        "Asset Tag",
+                        "Cip #",
+                        "Helpdesk",
+                        "Customer"
 
                     };
 

@@ -13,7 +13,7 @@ namespace ELIXIR.API.EXTENSIONS
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Elixir - Pharmacy", Version = "v1" });
             });
 
             return services;
@@ -29,7 +29,7 @@ namespace ELIXIR.API.EXTENSIONS
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("v1/swagger.json", "Elixir - Pharmacy V1");
             });
             //app.UseSwagger();
             //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ELIXIR.API v1"));

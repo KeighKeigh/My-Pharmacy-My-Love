@@ -63,11 +63,12 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                         ,"Account Title Code"
                         ,"Account Title"
                         ,"EmpId"
-                        ,"FullName"
+                        ,"FullName",
+                        "Formula Category"
                         ,"Asset Tag"
                         ,"Cip #"
-                        , "Helpdesk"
-                        ,"Rush"
+                        , "Helpdesk",
+                        "Customer"
 
                     };
 
@@ -125,10 +126,11 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                         row.Cell(24).Value = consolidate[index - 1].AccountTitle;
                         row.Cell(25).Value = consolidate[index - 1].EmpId;
                         row.Cell(26).Value = consolidate[index - 1].Fullname;
-                        row.Cell(27).Value = consolidate[index - 1].AssetTag;
-                        row.Cell(28).Value = consolidate[index - 1].CIPNo;
-                        row.Cell(29).Value = consolidate[index - 1].Helpdesk;
-                        row.Cell(30).Value = consolidate[index - 1].Rush;
+                        row.Cell(27).Value = consolidate[index - 1].Formula;
+                        row.Cell(28).Value = consolidate[index - 1].AssetTag;
+                        row.Cell(29).Value = consolidate[index - 1].CIPNo;
+                        row.Cell(30).Value = consolidate[index - 1].Helpdesk;
+                        row.Cell(31).Value = consolidate[index - 1].Customer;
 
                     }
                     worksheet.Columns().AdjustToContents();
