@@ -4,14 +4,16 @@ using ELIXIR.DATA.DATA_ACCESS_LAYER.STORE_CONTEXT;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ELIXIR.DATA.Migrations
 {
     [DbContext(typeof(StoreContext))]
-    partial class StoreContextModelSnapshot : ModelSnapshot
+    [Migration("20250528033427_AddNewTableOneCharging")]
+    partial class AddNewTableOneCharging
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -289,90 +291,6 @@ namespace ELIXIR.DATA.Migrations
                     b.HasIndex("MainMenuId");
 
                     b.ToTable("Modules");
-                });
-
-            modelBuilder.Entity("ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.ONECHARGING_MODEL.OneCharging", b =>
-                {
-                    b.Property<int?>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
-
-                    b.Property<DateTime?>("DateAdded")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("business_unit_code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("business_unit_id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("business_unit_name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("company_code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("company_id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("company_name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("deleted_at")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("department_code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("department_id")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("department_name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("department_unit_code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("department_unit_id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("department_unit_name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("location_code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("location_id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("location_name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("sub_unit_code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("sub_unit_id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("sub_unit_name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("sync_id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OneChargings");
                 });
 
             modelBuilder.Entity("ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.ORDERING_MODEL.GenerateOrderNo", b =>

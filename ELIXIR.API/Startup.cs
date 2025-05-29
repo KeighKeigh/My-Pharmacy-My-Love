@@ -62,7 +62,7 @@ namespace ELIXIR.API
 
             services.AddDbContext<StoreContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("Production"),
+                    Configuration.GetConnectionString("LiveConnectionTesting"),
                     sqlOptions =>
                     {
                         sqlOptions.CommandTimeout((int)TimeSpan.FromMinutes(2).TotalSeconds);

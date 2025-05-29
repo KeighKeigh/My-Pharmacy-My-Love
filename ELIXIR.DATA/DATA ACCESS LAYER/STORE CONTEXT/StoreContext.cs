@@ -1,6 +1,7 @@
 ﻿using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.IMPORT_MODEL;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.INVENTORY_MODEL;
+using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.ONECHARGING_MODEL;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.ORDERING_MODEL;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.QC_MODEL;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.SETUP_MODEL;
@@ -154,6 +155,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.STORE_CONTEXT
             get;
             set;
         }
+        public virtual DbSet<OneCharging>  OneChargings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1292,8 +1292,8 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
         public async Task<IReadOnlyList<ConsolidateFinanceReportDto>>ConsolidateFinanceReport(string DateFrom, string DateTo, string Search)
         {
-            var dateFrom = DateTime.Parse(DateFrom).Date;
-            var dateTo = DateTime.Parse(DateTo).Date;
+            //var dateFrom = DateTime.Parse(DateFrom).Date;
+            //var dateTo = DateTime.Parse(DateTo).Date;
             var receivingConsol = _context.WarehouseReceived
                 .AsNoTracking().GroupJoin(_context.POSummary, warehouse => warehouse.PO_Number, posummary => posummary.PO_Number, (warehouse , posummary) => new {warehouse, posummary })
                 .SelectMany(x => x.posummary.DefaultIfEmpty(), (x, posummary) => new {x.warehouse, posummary})
@@ -1305,7 +1305,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateFinanceReportDto
                 {
                     Id = x.warehouse.Id,
-                    TransactionDate = x.warehouse.ReceivingDate.ToString("yyyy-MM-dd"),
+                    TransactionDate = x.warehouse.ReceivingDate.Date,
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
                     Uom = x.warehouse.Uom,
@@ -1350,7 +1350,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                   select new ConsolidateFinanceReportDto
                                   {
                                       Id = t.Id,
-                                      TransactionDate = t.PreparedDate.Value.ToString("yyyy-MM-dd"),
+                                      TransactionDate = t.PreparedDate.Value.Date,
                                       ItemCode = m.ItemCode,
                                       ItemDescription = m.ItemDescription,
                                       Uom = m.Uom,
@@ -1404,7 +1404,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Select(x => new ConsolidateFinanceReportDto
                 {
                     Id = x.warehouse.Id,
-                    TransactionDate = x.receipt.TransactionDate.Value.ToString("yyyy-MM-dd"),
+                    TransactionDate = x.receipt.TransactionDate.Value.Date,
                     ItemCode = x.warehouse.ItemCode,
                     ItemDescription = x.warehouse.ItemDescription,
                     Uom = x.warehouse.Uom,
@@ -1466,7 +1466,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 ConsolidateFinanceReportDto
                 {
                     Id = x.issue.Id ,
-                    TransactionDate = x.miscDetail.TransactionDate.Value.ToString("yyyy-MM-dd"),
+                    TransactionDate = x.miscDetail.TransactionDate.Value.Date,
                     ItemCode = x.issue.ItemCode ,
                     ItemDescription = x.issue.ItemDescription ,
                     Uom = x.issue.Uom,
@@ -1554,122 +1554,204 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
 
             //test
 
-            var raw = (from m in _context.Transformation_Preparation.AsNoTracking()
-                       join w in _context.WarehouseReceived on m.WarehouseId equals w.Id into wj
-                       from w in wj.DefaultIfEmpty()
+    //        var raw = (from m in _context.Transformation_Preparation.AsNoTracking()
+    //                   join w in _context.WarehouseReceived on m.WarehouseId equals w.Id into wj
+    //                   from w in wj.DefaultIfEmpty()
 
-                       join po in _context.POSummary on w.PO_Number equals po.PO_Number into poj
-                       from po in poj.DefaultIfEmpty()
-
-
+    //                   join po in _context.POSummary on w.PO_Number equals po.PO_Number into poj
+    //                   from po in poj.DefaultIfEmpty()
 
 
-                       join tr in _context.Transformation_Request on m.TransformId equals tr.TransformId into trj
-                       from tr in trj.DefaultIfEmpty()
 
-                       join f in _context.Formulas on tr.Version equals f.Version into fj
-                       from f in fj.DefaultIfEmpty()
 
-                       join fr in _context.FormulaRequirements on f.Id equals fr.TransformationFormulaId into frj
-                       from fr in frj.DefaultIfEmpty()
+    //                   join tr in _context.Transformation_Request on m.TransformId equals tr.TransformId into trj
+    //                   from tr in trj.DefaultIfEmpty()
 
-                       join rm in _context.RawMaterials on fr.RawMaterialId equals rm.Id into rmj
-                       from rm in rmj.DefaultIfEmpty()
+    //                   join f in _context.Formulas on tr.Version equals f.Version into fj
+    //                   from f in fj.DefaultIfEmpty()
 
-                       join cat in _context.ItemCategories on rm.ItemCategoryId equals cat.Id into catj
-                       from cat in catj.DefaultIfEmpty()
+    //                   join fr in _context.FormulaRequirements on f.Id equals fr.TransformationFormulaId into frj
+    //                   from fr in frj.DefaultIfEmpty()
 
-                       where m.IsActive
-                       select new
-                       {
-                           m,
-                           w,
-                           po,
-                           rm,
-                           cat,
-                           tr,
-                           f,
-                           fr
-                       }).ToList();
+    //                   join rm in _context.RawMaterials on fr.RawMaterialId equals rm.Id into rmj
+    //                   from rm in rmj.DefaultIfEmpty()
 
-            var transformConsol = raw
-           .GroupBy(x => x.m.Id)
-           .Select(g => new ConsolidateFinanceReportDto
-           {
-               Id = g.Key,
-               TransactionDate = g.First().m.PreparedDate.ToString("yyyy-MM-dd"),
-               ItemCode = g.First().m.ItemCode,
-               ItemDescription = g.First().m.ItemDescription,
-               Uom = "KG",
-               Category = g.First().cat?.ItemCategoryName,
-               Quantity = Math.Round(g.First().m.QuantityNeeded, 2),
-               UnitCost = g.First().po?.UnitPrice ?? 0,
-               LineAmount = (g.First().po?.UnitPrice ?? 0) * Math.Round(g.First().m.QuantityNeeded, 2),
-               SupplierName = g.First().w?.Supplier,
-               EncodedBy = g.First().m.PreparedBy,
-               CompanyCode = "10",
-               CompanyName = "RDF Corporate Services",
-               DepartmentCode = "0010",
-               DepartmentName = "Corporate Common",
-               LocationCode = "0001",
-               LocationName = "Head Office",
-               AccountTitleCode = "115998",
-               AccountTitle = "Materials & Supplies Inventory",
-               TransactionType = "Transformation",
-               Formula = string.Join(", ",
-        g.Where(x =>
-            x.fr != null &&
-            x.f != null &&
-            x.fr.TransformationFormulaId == x.f.Id &&
-            x.rm != null &&
-            x.cat != null &&
-            x.cat.Id == x.rm.ItemCategoryId &&
-            x.rm.Id == x.fr.RawMaterialId &&
-            x.m.ItemCode == x.f.ItemCode)
-         .Select(x => x.cat.ItemCategoryName)
-         .Distinct()
-    )
+    //                   join cat in _context.ItemCategories on rm.ItemCategoryId equals cat.Id into catj
+    //                   from cat in catj.DefaultIfEmpty()
 
-           });
+    //                   where m.IsActive
+    //                   select new
+    //                   {
+    //                       m,
+    //                       w,
+    //                       po,
+    //                       rm,
+    //                       cat,
+    //                       tr,
+    //                       f,
+    //                       fr
+    //                   }).ToList();
 
+    //        var transformConsol = raw
+    //       .GroupBy(x => x.m.Id)
+    //       .Select(g => new ConsolidateFinanceReportDto
+    //       {
+    //           Id = g.Key,
+    //           TransactionDate = g.First().m.PreparedDate.ToString("yyyy-MM-dd"),
+    //           ItemCode = g.First().m.ItemCode,
+    //           ItemDescription = g.First().m.ItemDescription,
+    //           Uom = "KG",
+    //           Category = g.First().cat?.ItemCategoryName,
+    //           Quantity = Math.Round(g.First().m.QuantityNeeded, 2),
+    //           UnitCost = g.First().po?.UnitPrice ?? 0,
+    //           LineAmount = (g.First().po?.UnitPrice ?? 0) * Math.Round(g.First().m.QuantityNeeded, 2),
+    //           SupplierName = g.First().w?.Supplier,
+    //           EncodedBy = g.First().m.PreparedBy,
+    //           CompanyCode = "10",
+    //           CompanyName = "RDF Corporate Services",
+    //           DepartmentCode = "0010",
+    //           DepartmentName = "Corporate Common",
+    //           LocationCode = "0001",
+    //           LocationName = "Head Office",
+    //           AccountTitleCode = "115998",
+    //           AccountTitle = "Materials & Supplies Inventory",
+    //           TransactionType = "Transformation",
+    //           Formula = string.Join(", ",
+    //    g.Where(x =>
+    //        x.fr != null &&
+    //        x.f != null &&
+    //        x.fr.TransformationFormulaId == x.f.Id &&
+    //        x.rm != null &&
+    //        x.cat != null &&
+    //        x.cat.Id == x.rm.ItemCategoryId &&
+    //        x.rm.Id == x.fr.RawMaterialId &&
+    //        x.m.ItemCode == x.f.ItemCode)
+    //     .Select(x => x.cat.ItemCategoryName)
+    //     .Distinct()
+    //)
+
+    //       });
+
+            var result = (from tp in _context.Transformation_Planning
+                          where tp.Status == true
+                          join warehouse in _context.WarehouseReceived on tp.Id equals warehouse.TransformId
+                          //join posummary in _context.POSummary on tp.ItemCode equals posummary.ItemCode into posJoin
+                          //from posummary in posJoin.DefaultIfEmpty()
+
+                          select new
+                          {
+                              TransformId = tp.Id,
+                              ItemCode = tp.ItemCode,
+                              ItemDescription = tp.ItemDescription,
+                              ActualQuantity = tp.Batch * tp.Quantity,
+                              TotalQuantity = tp.Batch * tp.Quantity,
+                              Category = "Formula",
+                              ProdPlan = tp.ProdPlan,
+                              DateTransformed = warehouse.ReceivingDate.ToString(),
+                              Version = tp.Version,
+                              Batch = tp.Batch,
+                              //UnitPrice = posummary.UnitPrice,
+                              PreparedBy = tp.AddedBy,
+                              
+
+
+
+
+                          }).Union(
+             from tp2 in _context.Transformation_Planning
+             join tp in _context.Transformation_Preparation on tp2.Id equals tp.TransformId
+             join po in _context.POSummary on tp2.ItemCode equals po.ItemCode into posJoin
+             from po in posJoin.DefaultIfEmpty()
+             where  tp2.Status == true && tp.IsActive == true && tp.IsMixed == true
+             group tp by new { tp.TransformId, tp.ItemCode, tp.QuantityNeeded, tp.ItemDescription, tp2.Version, tp2.Batch , po.UnitPrice, tp2.AddedBy, tp2.ProdPlan} into g
+             select new
+             {
+                 TransformId = g.Key.TransformId,
+                 ItemCode = g.Key.ItemCode,
+                 ItemDescription = g.Key.ItemDescription,
+                 ActualQuantity = g.Sum(x => x.WeighingScale),
+                 TotalQuantity = g.Key.QuantityNeeded,
+                 Category = "Recipe",
+                 ProdPlan = g.Key.ProdPlan,
+                 DateTransformed = (string)null,
+                 Version = g.Key.Version,
+                 Batch = g.Key.Batch,
+                 //UnitPrice = g.Key.UnitPrice,
+                 PreparedBy = g.Key.AddedBy
+                 
+             });
+
+            var final = result.Select(x => new ConsolidateFinanceReportDto
+            {
+                Id = x.TransformId,
+                TransactionDate = x.ProdPlan.Date,
+                ItemCode = x.ItemCode,
+                ItemDescription = x.ItemDescription,
+                Uom = "KG",
+                Category = x.Category,
+                Quantity = x.TotalQuantity,
+                //UnitCost = x.UnitPrice,
+                //LineAmount = (x.UnitPrice * (Math.Round(x.TotalQuantity, 2))) == 0 ? 1 : 1,
+                Source = "",
+                TransactionType = "Transformation",
+                Reason = "",
+                Reference = "",
+                SupplierName = "",
+                EncodedBy = x.PreparedBy,
+                CompanyCode = "10",
+                CompanyName = "RDF Corporate Services",
+                DepartmentCode = "0010",
+                DepartmentName = "Corporate Common",
+                LocationCode = "0001",
+                LocationName = "Head Office",
+                AccountTitle = "Inventory Transfer",
+                AccountTitleCode = "115999",
+                EmpId = "",
+                Fullname = x.PreparedBy,
+                AssetTag = "",
+                CIPNo = "",
+                Helpdesk = "",
+                Rush = "",
+                
+            });
 
 
 
             //test
 
-            //if (!string.IsNullOrEmpty(DateFrom) && !string.IsNullOrEmpty(DateTo))
-            //{
-            //    var dateFrom = DateTime.Parse(DateFrom).Date;
-            //    var dateTo = DateTime.Parse(DateTo).Date;
+            if (!string.IsNullOrEmpty(DateFrom) && !string.IsNullOrEmpty(DateTo))
+            {
+                var dateFrom = DateTime.Parse(DateFrom).Date;
+                var dateTo = DateTime.Parse(DateTo).Date;
 
-            //    receivingConsol = receivingConsol
-            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-            //        .ToList()
-            //        ;
+                receivingConsol = receivingConsol
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+                    .ToList()
+                    ;
 
-            //    moveOrderConsol = moveOrderConsol
-            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-            //        ;
+                moveOrderConsol = moveOrderConsol
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+                    ;
 
-            //    receiptConsol = receiptConsol
-            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-            //        ;
+                receiptConsol = receiptConsol
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+                    ;
 
-            //    issueConsol = issueConsol
-            //         .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-            //        ;
+                issueConsol = issueConsol
+                     .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+                    ;
 
-            //    transformConsol = transformConsol
-            //        .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
-            //        ;
+                final = final
+                    .Where(x => x.TransactionDate >= dateFrom && x.TransactionDate <= dateTo)
+                    ;
 
-            //}
+            }
 
             var consolidateList = receivingConsol
                 .Concat(await moveOrderConsol.ToListAsync())
                 .Concat(await receiptConsol.ToListAsync())
                 .Concat(await issueConsol.ToListAsync())
-                .Concat( transformConsol.ToList());
+                .Concat(await final.ToListAsync());
 
             var reports = consolidateList.Select(consol => new ConsolidateFinanceReportDto
             {
@@ -1702,7 +1784,6 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 CIPNo = consol.CIPNo,
                 Helpdesk = consol.Helpdesk,
                 Rush = consol.Rush,
-                Formula = consol.Formula,
                 Customer = consol.Customer
                 
             });
