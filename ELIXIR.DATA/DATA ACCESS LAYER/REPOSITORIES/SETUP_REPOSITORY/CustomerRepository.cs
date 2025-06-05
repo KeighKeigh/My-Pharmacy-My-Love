@@ -83,7 +83,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.SETUP_REPOSITORY
                                               DateAdded = customer.DateAdded.ToString("MM/dd/yyyy"),
                                               AddedBy = customer.AddedBy,
                                               IsActive = customer.IsActive
-                                          }).Where(x => x.IsActive == true)
+                                          }).Where(x => x.IsActive == true).OrderBy(x => x.CustomerName)
                                             .ToListAsync();
         }
 

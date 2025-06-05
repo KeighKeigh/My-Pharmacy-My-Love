@@ -156,6 +156,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.STORE_CONTEXT
             set;
         }
         public virtual DbSet<OneCharging>  OneChargings { get; set; }
+        public virtual DbSet<OneAccountTitle> OneAccountTitles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

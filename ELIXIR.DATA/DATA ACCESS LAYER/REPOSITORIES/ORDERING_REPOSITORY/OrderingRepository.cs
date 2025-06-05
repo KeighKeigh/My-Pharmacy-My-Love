@@ -440,7 +440,22 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
         }
         public async Task<bool> AddNewOrders(Ordering orders)
         {
+            var orderOneCharging = await _context.OneChargings.FirstOrDefaultAsync(x => x.code == orders.OneChargingCode);
 
+            if (orderOneCharging == null)
+            {
+                return false;
+            }
+            else
+            {
+                orders.LocationCode = orderOneCharging.location_code;
+                orders.LocationName = orderOneCharging.location_name;
+                orders.DepartmentName = orderOneCharging.department_name;
+                orders.DepartmentCode = orderOneCharging.department_code;
+                orders.CompanyCode = orderOneCharging.company_code;
+                orders.CompanyName = orderOneCharging.company_name;
+
+            }
             orders.IsActive = true;
 
             await _context.Orders.AddAsync(orders);
@@ -508,7 +523,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
         public async Task<bool> ValidateExistingOrders(Ordering orders)
         {
             DateTime startDate = new DateTime(DateTime.Today.Year, 1, 1); //this is 2023 by default
-            var validate = await _context.Orders.Where(x => x.TransactId == orders.TransactId && x.OrderDate >= startDate)
+            var validate = await _context.Orders.Where(x => x.TransactId == orders.TransactId && x.OrderDate >= startDate && x.OrderNo == orders.OrderNo)
                                                 .Where(x => x.IsActive == true)
                                                 .FirstOrDefaultAsync();
 

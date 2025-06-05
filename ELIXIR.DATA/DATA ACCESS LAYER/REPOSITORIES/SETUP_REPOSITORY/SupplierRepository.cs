@@ -77,7 +77,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.SETUP_REPOSITORY
 
         public async Task<IReadOnlyList<SupplierDto>> GetAllActiveSupplier()
         {
-            return await _context.Suppliers.OrderBy(s => s.SupplierName)
+            return await _context.Suppliers.OrderBy(name => name.SupplierName != "RDF Feed, Livestock & Foods, Inc").ThenBy(x => x.SupplierName)
                             .Select(supplier => new SupplierDto
                             {
                                 Id = supplier.Id,

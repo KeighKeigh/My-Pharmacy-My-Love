@@ -1,10 +1,12 @@
 ﻿
 
+using ELIXIR.API.Authentication;
 using ELIXIR.DATA.CORE.ICONFIGURATION;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.EXTENSIONS;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.HELPERS;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS;
 using ELIXIR.DATA.DTOs.ONECHARGING_DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,6 +16,7 @@ namespace ELIXIR.API.Controllers.ONECHARGING_CONTROLLER
 
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class OneCharginController : ControllerBase
     {
 
@@ -25,6 +28,7 @@ namespace ELIXIR.API.Controllers.ONECHARGING_CONTROLLER
         }
 
         [HttpPost]
+        [ApiKeyAuth]
         [Route("AddOneCharging")]
         public async Task<IActionResult> AddDataOneCharging([FromBody] List<OneChargingDto> data)
         {
