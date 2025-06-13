@@ -1,11 +1,15 @@
-﻿using ELIXIR.DATA.CORE.ICONFIGURATION;
+﻿using DocumentFormat.OpenXml.VariantTypes;
+using ELIXIR.DATA.CORE.ICONFIGURATION;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.EXTENSIONS;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.HELPERS;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.ORDERING_MODEL;
+using ELIXIR.DATA.DATA_ACCESS_LAYER.STORE_CONTEXT;
 using ELIXIR.DATA.DTOs.ORDERING_DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ELIXIR.API.Controllers.ORDERING_CONTROLLER
@@ -14,10 +18,12 @@ namespace ELIXIR.API.Controllers.ORDERING_CONTROLLER
     public class OrderingController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
-        public OrderingController(IUnitOfWork unitofwork)
+        private readonly StoreContext _context;
+        public OrderingController(IUnitOfWork unitofwork, StoreContext context)
         {
 
             _unitOfWork = unitofwork;
+            _context = context;
 
         }
 
@@ -143,6 +149,13 @@ namespace ELIXIR.API.Controllers.ORDERING_CONTROLLER
                 //    accountTitleEmpty.Add(items);
                 //    continue;
                 //}
+                if (order.Count(x => x.TransactId == items.TransactId && items.OrderNo == x.OrderNo) > 1)
+                {
+                    duplicateList.Add(items);
+                    continue;
+
+                }
+
 
                 var validateDuplicate = await _unitOfWork.Order.ValidateExistingOrders(items);
                 var validateFarmName = await _unitOfWork.Order.ValidateCustomerName(items);
@@ -377,7 +390,7 @@ namespace ELIXIR.API.Controllers.ORDERING_CONTROLLER
         [Route("PrepareItemsForMoveOrder")]
         public async Task<IActionResult> PrepareItemsForMoveOrder([FromBody] MoveOrder order)
         {
-
+            var one = await _context.OneChargings.FirstOrDefaultAsync(x => x.code == order.OneChargingCode);
             var details = await _unitOfWork.Order.GetMoveOrderDetailsForMoveOrder(order.OrderNoPKey);
 
             order.OrderNoPKey = details.Id;
@@ -395,6 +408,23 @@ namespace ELIXIR.API.Controllers.ORDERING_CONTROLLER
             order.IsPrepared = true;
             order.OrderRemarks = details.OrderRemarks;
             order.Remarks = details.Remarks;
+            //kk
+
+            if (one != null)
+            {
+                order.LocationCode = one.location_code;
+                order.LocationName = one.location_name;
+                order.DepartmentCode = one.department_code;
+                order.DepartmentName = one.department_name;
+                order.CompanyCode = one.company_code;
+                order.CompanyName = one.company_name;
+                order.BusinessUnitCode = one.business_unit_code;
+                order.BusinessUnitName = one.business_unit_name;
+                order.DepartmentUnitCode = one.department_unit_code;
+                order.DepartmentUnitName = one.department_unit_name;
+                order.SubUnitCode = one.sub_unit_code;
+                order.SubUnitName = one.sub_unit_name;
+            }
 
             await _unitOfWork.Order.PrepareItemForMoveOrder(order);
             await _unitOfWork.CompleteAsync();

@@ -1,4 +1,5 @@
-﻿using ELIXIR.DATA.CORE.INTERFACES.INVENTORY_INTERFACE;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using ELIXIR.DATA.CORE.INTERFACES.INVENTORY_INTERFACE;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.HELPERS;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.INVENTORY_MODEL;
 using ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.WAREHOUSE_MODEL;
@@ -27,6 +28,24 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
 
         public async Task<bool> AddMiscellaneousReceipt(MiscellaneousReceipt receipt)
         {
+            var one = await _context.OneChargings.FirstOrDefaultAsync(x => x.code == receipt.OneChargingCode);
+            if (one != null)
+            {
+
+                receipt.LocationCode = one.location_code;
+                receipt.LocationName = one.location_name;
+                receipt.CompanyCode = one.company_code;
+                receipt.CompanyName = one.company_name;
+                receipt.DepartmentCode = one.department_code;
+                receipt.DepartmentName = one.department_name;
+                receipt.BusinessUnitCode = one.business_unit_code;
+                receipt.BusinessUnitName = one.business_unit_name;
+                receipt.DepartmentUnitCode = one.department_unit_code;
+                receipt.DepartmentUnitName = one.department_unit_name;
+                receipt.SubUnitCode = one.sub_unit_code;
+                receipt.SubUnitName = one.sub_unit_name;
+
+            }
             await _context.MiscellaneousReceipts.AddAsync(receipt);
             return true;
         }
@@ -54,7 +73,22 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
                 SupplierName = x.Supplier,
                 TotalQuantity = x.TotalQuantity,
                 PreparedDate = x.PreparedDate.ToString("MM/dd/yyyy"),
-                Remarks = x.Remarks
+                Remarks = x.Remarks,
+                LocationCode = x.LocationCode,
+                LocationName = x.LocationName,
+                CompanyCode = x.CompanyCode,
+                CompanyName = x.CompanyName,
+                DepartmentCode = x.DepartmentCode,
+                DepartmentName = x.DepartmentName,
+                BusinessUnitCode = x.BusinessUnitCode,
+                BusinessUnitName = x.BusinessUnitName,
+                DepartmentUnitCode = x.DepartmentUnitCode,
+                DepartmentUnitName = x.DepartmentUnitName,
+                SubUnitCode = x.SubUnitCode,
+                SubUnitName = x.SubUnitName,
+                AccountCode = x.AccountCode,
+                AccountTitle = x.AccountTitle,
+                
                 });
 
             return await receipt.ToListAsync();
@@ -117,7 +151,21 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
                     PreparedDate = x.PreparedDate.ToString("MM/dd/yyyy"),
                     Remarks = x.Remarks,
                     PreparedBy = x.PreparedBy,
-                    IsActive = x.IsActive 
+                    IsActive = x.IsActive,
+                    LocationCode = x.LocationCode,
+                    LocationName = x.LocationName,
+                    CompanyCode = x.CompanyCode,
+                    CompanyName = x.CompanyName,
+                    DepartmentCode = x.DepartmentCode,
+                    DepartmentName = x.DepartmentName,
+                    BusinessUnitCode = x.BusinessUnitCode,
+                    BusinessUnitName = x.BusinessUnitName,
+                    DepartmentUnitCode = x.DepartmentUnitCode,
+                    DepartmentUnitName = x.DepartmentUnitName,
+                    SubUnitCode = x.SubUnitCode,
+                    SubUnitName = x.SubUnitName,
+                    AccountCode = x.AccountCode,
+                    AccountTitle = x.AccountTitle,
                 });
 
 
@@ -139,7 +187,21 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
                 PreparedDate = x.PreparedDate.ToString("MM/dd/yyyy"),
                 Remarks = x.Remarks,
                 PreparedBy = x.PreparedBy,
-                IsActive = x.IsActive
+                IsActive = x.IsActive,
+                LocationCode = x.LocationCode,
+                LocationName = x.LocationName,
+                CompanyCode = x.CompanyCode,
+                CompanyName = x.CompanyName,
+                DepartmentCode = x.DepartmentCode,
+                DepartmentName = x.DepartmentName,
+                BusinessUnitCode = x.BusinessUnitCode,
+                BusinessUnitName = x.BusinessUnitName,
+                DepartmentUnitCode = x.DepartmentUnitCode,
+                DepartmentUnitName = x.DepartmentUnitName,
+                SubUnitCode = x.SubUnitCode,
+                SubUnitName = x.SubUnitName,
+                AccountCode = x.AccountCode,
+                AccountTitle = x.AccountTitle,
 
             })
               .Where(x => (Convert.ToString(x.Id)).ToLower()
@@ -170,7 +232,20 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
                                SupplierName = receiptParent.Supplier,
                                PreparedDate = receiptParent.PreparedDate.ToString(),
                                PreparedBy = receiptParent.PreparedBy,
-                               Remarks = receiptParent.Remarks
+                               Remarks = receiptParent.Remarks,
+                               DepartmentCode = receiptParent.DepartmentCode,
+                               DepartmentName = receiptParent.DepartmentName,
+                               LocationCode = receiptParent.LocationCode,
+                               LocationName = receiptParent.LocationName,
+                               CompanyCode = receiptParent.CompanyCode,
+                               CompanyName = receiptParent.CompanyName,
+                               BusinessUnitCode = receiptParent.BusinessUnitCode,
+                               BusinessUnitName = receiptParent.BusinessUnitName,
+                               DepartmentUnitCode = receiptParent.DepartmentUnitCode,
+                               DepartmentUnitName = receiptParent.DepartmentUnitName,
+                               SubUnitCode = receiptParent.SubUnitCode,
+                               SubUnitName = receiptParent.SubUnitName,
+
                            });
 
             return await receipt.ToListAsync();
@@ -183,6 +258,24 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
 
         public async Task<bool> AddMiscellaneousIssue(MiscellaneousIssue issue)
         {
+            var one = await _context.OneChargings.FirstOrDefaultAsync(x => x.code == issue.OneChargingCode);
+            if ( one != null)
+            {
+
+                issue.LocationCode = one.location_code;
+                issue.LocationName = one.location_name;
+                issue.CompanyCode = one.company_code;
+                issue.CompanyName = one.company_name;
+                issue.DepartmentCode = one.department_code;
+                issue.DepartmentName = one.department_name;
+                issue.BusinessUnitCode = one.business_unit_code;
+                issue.BusinessUnitName = one.business_unit_name;
+                issue.DepartmentUnitCode = one.department_unit_code;
+                issue.DepartmentUnitName = one.department_unit_name;
+                issue.SubUnitCode = one.sub_unit_code;
+                issue.SubUnitName = one.sub_unit_name;
+
+            }
             await _context.MiscellaneousIssues.AddAsync(issue);
             return true;
         }
@@ -207,7 +300,22 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
                     PreparedDate = x.PreparedDate.ToString("MM/dd/yyyy"),
                     Remarks = x.Remarks,
                     PreparedBy = x.PreparedBy,
-                    IsActive = x.IsActive
+                    IsActive = x.IsActive,
+                    LocationCode = x.LocationCode,
+                    LocationName = x.LocationName,
+                    CompanyCode = x.CompanyCode,
+                    CompanyName = x.CompanyName,
+                    DepartmentCode = x.DepartmentCode,
+                    DepartmentName = x.DepartmentName,
+                    BusinessUnitCode = x.BusinessUnitCode,
+                    BusinessUnitName = x.BusinessUnitName,
+                    DepartmentUnitCode = x.DepartmentUnitCode,
+                    DepartmentUnitName = x.DepartmentUnitName,
+                    SubUnitCode = x.SubUnitCode,
+                    SubUnitName = x.SubUnitName,
+                    AccountCode = x.AccountCode,
+                    AccountTitle = x.AccountTitle,
+                    
                 });
 
             return await PagedList<MIssueDto>.CreateAsync(issue, userParams.PageNumber, userParams.PageSize);
@@ -226,7 +334,21 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
                  PreparedDate = x.PreparedDate.ToString("MM/dd/yyyy"),
                  Remarks = x.Remarks,
                  PreparedBy = x.PreparedBy,
-                 IsActive = x.IsActive
+                 IsActive = x.IsActive,
+                 LocationCode = x.LocationCode,
+                 LocationName = x.LocationName,
+                 CompanyCode = x.CompanyCode,
+                 CompanyName = x.CompanyName,
+                 DepartmentCode = x.DepartmentCode,
+                 DepartmentName = x.DepartmentName,
+                 BusinessUnitCode = x.BusinessUnitCode,
+                 BusinessUnitName = x.BusinessUnitName,
+                 DepartmentUnitCode = x.DepartmentUnitCode,
+                 DepartmentUnitName = x.DepartmentUnitName,
+                 SubUnitCode = x.SubUnitCode,
+                 SubUnitName = x.SubUnitName,
+                 AccountCode = x.AccountCode,
+                 AccountTitle = x.AccountTitle,
 
              }).Where(x => (Convert.ToString(x.IssuePKey)).ToLower()
                .Contains(search.Trim().ToLower()));
@@ -292,8 +414,74 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.INVENTORY_REPOSITORY
                                                         ItemDescription = x.ItemDescription,
                                                         TotalQuantity = x.Quantity,
                                                         Remarks = x.Remarks
+
                                                     });
 
+
+            //var issues = _context.MiscellaneousIssues.Where(x => x.IsActive == true)
+            //                                 .Select(x => new MIssueDto
+            //                                 {
+            //                                     Id = x.Id,
+            //                                     Customer = x.Customer,
+            //                                     CustomerCode = x.Customer,
+            //                                     PreparedDate = x.PreparedDate.ToString(),
+            //                                     CompanyCode = x.CompanyCode,
+            //                                     CompanyName = x.CompanyName,
+            //                                     DepartmentCode = x.DepartmentCode,
+            //                                     DepartmentName = x.DepartmentName,
+            //                                     LocationCode = x.LocationCode,
+            //                                     LocationName = x.LocationName,
+            //                                     //AccountCode = x.AccountCode,
+            //                                     //AccountTitles = x.AccountTitles,
+            //                                     //EmpId = x.EmpId,
+            //                                     //FullName = x.FullName,
+            //                                     BusinessUnitName = x.BusinessUnitName,
+            //                                     BusinessUnitCode = x.BusinessUnitCode,
+            //                                     DepartmentUnitName = x.DepartmentUnitName,
+            //                                     DepartmentUnitCode = x.DepartmentUnitCode,
+            //                                     SubUnitName = x.SubUnitName,
+            //                                     SubUnitCode = x.SubUnitCode,
+
+
+            //                                 });
+
+
+            //var warehouse = _context.MiscellaneousIssueDetails
+            //    .GroupJoin(issues, misc => misc.IssuePKey, issue => issue.Id, (misc, issue) => new { misc, issue })
+            //    .SelectMany(x => x.issue.DefaultIfEmpty(), (x, issue) => new { x.misc, issue })
+            //    .Where(x => x.misc.IssuePKey == id)
+            //    .Select(x => new MIssueDto
+            //    {
+            //        IssuePKey = x.misc.IssuePKey,
+            //        Customer = x.issue.Customer,
+            //        CustomerCode = x.issue.CustomerCode,
+            //        PreparedDate = x.misc.PreparedDate.ToString(),
+            //        PreparedBy = x.misc.PreparedBy,
+            //        ItemCode = x.misc.ItemCode,
+            //        ItemDescription = x.misc.ItemDescription,
+            //        TotalQuantity = x.misc.Quantity,
+            //        Remarks = x.misc.Remarks,
+
+            //        Uom = x.misc.Uom,
+
+            //        CompanyCode = x.issue.CompanyCode,
+            //        CompanyName = x.issue.CompanyName,
+            //        DepartmentCode = x.issue.DepartmentCode,
+            //        DepartmentName = x.issue.DepartmentName,
+            //        LocationCode = x.issue.LocationCode,
+            //        LocationName = x.issue.LocationName,
+                    
+            //        BusinessUnitName = x.issue.BusinessUnitName,
+            //        BusinessUnitCode = x.issue.BusinessUnitCode,
+            //        DepartmentUnitName = x.issue.DepartmentUnitName,
+            //        DepartmentUnitCode = x.issue.DepartmentUnitCode,
+            //        SubUnitName = x.issue.SubUnitName,
+            //        SubUnitCode = x.issue.SubUnitCode,
+
+
+
+
+            //    });
             return await warehouse.ToListAsync();
         }
 

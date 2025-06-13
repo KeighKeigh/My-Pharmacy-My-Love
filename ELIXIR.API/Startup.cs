@@ -112,7 +112,7 @@ namespace ELIXIR.API
             });
 
             services.AddControllers();
-
+            services.AddHttpClient();
             ////kestrell
             //services.WebHost.ConfigureKestrel(serverOptions =>
             //{

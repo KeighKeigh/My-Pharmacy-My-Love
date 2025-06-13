@@ -442,11 +442,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
         {
             var orderOneCharging = await _context.OneChargings.FirstOrDefaultAsync(x => x.code == orders.OneChargingCode);
 
-            if (orderOneCharging == null)
-            {
-                return false;
-            }
-            else
+            if (orderOneCharging != null)
             {
                 orders.LocationCode = orderOneCharging.location_code;
                 orders.LocationName = orderOneCharging.location_name;
@@ -455,7 +451,14 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                 orders.CompanyCode = orderOneCharging.company_code;
                 orders.CompanyName = orderOneCharging.company_name;
 
+                orders.BusinessUnitCode = orderOneCharging.business_unit_code;
+                orders.BusinessUnitName = orderOneCharging.business_unit_name;
+                orders.DepartmentUnitCode = orderOneCharging.department_unit_code;
+                orders.DepartmentUnitName = orderOneCharging.department_unit_name;
+                orders.SubUnitCode = orderOneCharging.sub_unit_code;
+                orders.SubUnitName = orderOneCharging.sub_unit_name;
             }
+
             orders.IsActive = true;
 
             await _context.Orders.AddAsync(orders);
@@ -523,7 +526,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
         public async Task<bool> ValidateExistingOrders(Ordering orders)
         {
             DateTime startDate = new DateTime(DateTime.Today.Year, 1, 1); //this is 2023 by default
-            var validate = await _context.Orders.Where(x => x.TransactId == orders.TransactId && x.OrderDate >= startDate && x.OrderNo == orders.OrderNo)
+            var validate = await _context.Orders.Where(x => x.TransactId == orders.TransactId && x.OrderNo == orders.OrderNo)
                                                 .Where(x => x.IsActive == true)
                                                 .FirstOrDefaultAsync();
 
@@ -541,7 +544,21 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                                         {
                                             x.FarmName,
                                             x.IsActive,
-                                            x.PreparedDate
+                                            x.PreparedDate,
+
+
+                                            x.DepartmentName,
+                                            x.DepartmentCode,
+                                            x.CompanyName,
+                                            x.CompanyCode,
+                                            x.LocationCode,
+                                            x.LocationName,
+                                            x.BusinessUnitCode,
+                                            x.BusinessUnitName,
+                                            x.DepartmentUnitCode,
+                                            x.DepartmentUnitName,
+                                            x.SubUnitCode,
+                                            x.SubUnitName
 
                                         }).Where(x => x.Key.IsActive == true)
                                           .Where(x => x.Key.PreparedDate == null)
@@ -549,7 +566,20 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                                           .Select(x => new OrderDto
                                           {
                                               Farm = x.Key.FarmName,
-                                              IsActive = x.Key.IsActive
+                                              IsActive = x.Key.IsActive,
+
+                                              DepartmentName = x.Key.DepartmentName,
+                                              DepartmentCode = x.Key.DepartmentCode,
+                                              CompanyName = x.Key.CompanyName,
+                                              CompanyCode = x.Key.CompanyCode,
+                                              LocationName = x.Key.LocationName,
+                                              LocationCode = x.Key.LocationCode,
+                                              BusinessUnitCode = x.Key.BusinessUnitCode,
+                                              BusinessUnitName = x.Key.BusinessUnitName,
+                                              DepartmentUnitCode = x.Key.DepartmentUnitCode,
+                                              DepartmentUnitName = x.Key.DepartmentUnitName,
+                                              SubUnitCode = x.Key.SubUnitCode,
+                                              SubUnitName = x.Key.SubUnitName,
                                           });
             
             return await PagedList<OrderDto>.CreateAsync(orders, userParams.PageNumber, userParams.PageSize);
@@ -750,7 +780,20 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                                           x.FarmName,
                                           x.IsActive,
                                           x.IsApproved,
-                                          x.IsMove
+                                          x.IsMove,
+
+                                          x.DepartmentName,
+                                          x.DepartmentCode,
+                                          x.CompanyName,
+                                          x.CompanyCode,
+                                          x.LocationCode,
+                                          x.LocationName,
+                                          x.BusinessUnitCode,
+                                          x.BusinessUnitName,
+                                          x.DepartmentUnitCode,
+                                          x.DepartmentUnitName,
+                                          x.SubUnitCode,
+                                          x.SubUnitName
 
                                       }).Where(x => x.Key.IsActive == true)
                                         .Where(x => x.Key.IsApproved == true)
@@ -759,7 +802,20 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                                         {
                                             Farm = x.Key.FarmName,
                                             IsActive = x.Key.IsActive,
-                                            IsApproved = x.Key.IsApproved != null
+                                            IsApproved = x.Key.IsApproved != null,
+
+                                            DepartmentName = x.Key.DepartmentName,
+                                            DepartmentCode = x.Key.DepartmentCode,
+                                            CompanyName = x.Key.CompanyName,
+                                            CompanyCode = x.Key.CompanyCode,
+                                            LocationName = x.Key.LocationName,
+                                            LocationCode = x.Key.LocationCode,
+                                            BusinessUnitCode = x.Key.BusinessUnitCode,
+                                            BusinessUnitName = x.Key.BusinessUnitName,
+                                            DepartmentUnitCode = x.Key.DepartmentUnitCode,
+                                            DepartmentUnitName = x.Key.DepartmentUnitName,
+                                            SubUnitCode = x.Key.SubUnitCode,
+                                            SubUnitName = x.Key.SubUnitName,
                                         });
 
             return await PagedList<OrderDto>.CreateAsync(orders, userParams.PageNumber, userParams.PageSize);
@@ -781,7 +837,21 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                 x.IsMove,
                 x.IsReject,
                 x.Remarks,
-                x.OrderRemarks
+                x.OrderRemarks,
+
+                x.DepartmentName,
+                x.DepartmentCode,
+                x.CompanyName,
+                x.CompanyCode,
+                x.LocationCode,
+                x.LocationName,
+                x.BusinessUnitCode,
+                x.BusinessUnitName,
+                x.DepartmentUnitCode,
+                x.DepartmentUnitName,
+                x.SubUnitCode,
+                x.SubUnitName
+
 
             }).Where(x => x.Key.FarmName == farm)
               .Where(x => x.Key.IsApproved == true)
@@ -800,7 +870,22 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                 IsMove = x.Key.IsMove,
                 IsReject = x.Key.IsReject != null,
                 Remarks = x.Key.Remarks,
-                OrderRemarks = x.Key.OrderRemarks
+                OrderRemarks = x.Key.OrderRemarks,
+
+                DepartmentName = x.Key.DepartmentName,
+                DepartmentCode = x.Key.DepartmentCode,
+                CompanyName = x.Key.CompanyName,
+                CompanyCode = x.Key.CompanyCode,
+                LocationName = x.Key.LocationName,
+                LocationCode = x.Key.LocationCode,
+                BusinessUnitCode = x.Key.BusinessUnitCode,
+                BusinessUnitName = x.Key.BusinessUnitName,
+                DepartmentUnitCode = x.Key.DepartmentUnitCode,
+                DepartmentUnitName = x.Key.DepartmentUnitName,
+                SubUnitCode = x.Key.SubUnitCode,
+                SubUnitName = x.Key.SubUnitName,
+
+                
 
             });
 
@@ -1618,7 +1703,19 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                 x.IsPrint,
                 x.IsTransact,
                 x.DeliveryStatus,
-                x.OrderRemarks
+                x.OrderRemarks,
+                x.DepartmentCode,
+                x.DepartmentName,
+                x.LocationCode,
+                x.LocationName,
+                x.CompanyCode,
+                x.CompanyName,
+                x.BusinessUnitCode,
+                x.BusinessUnitName,
+                x.DepartmentUnitCode,
+                x.DepartmentUnitName,
+                x.SubUnitCode,
+                x.SubUnitName,
 
             }).Where(x => x.Key.IsApprove == true)
             .Where(x => x.Key.DeliveryStatus != null)
@@ -1645,7 +1742,20 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ORDERING_REPOSITORY
                ApprovedDate = x.Key.ApproveDateTempo.ToString(),
                IsPrint = x.Key.IsPrint != null,
                IsTransact = x.Key.IsTransact != null,
-               OrderRemarks = x.Key.OrderRemarks
+               OrderRemarks = x.Key.OrderRemarks,
+               DepartmentCode = x.Key.DepartmentCode,
+               DepartmentName = x.Key.DepartmentName,
+               CompanyCode = x.Key.CompanyCode,
+               CompanyName = x.Key.CompanyName,
+               LocationCode = x.Key.LocationCode,
+               LocationName = x.Key.LocationName,
+               BusinessUnitCode = x.Key.BusinessUnitCode,
+               BusinessUnitName = x.Key.BusinessUnitName,
+               DepartmentUnitCode = x.Key.DepartmentUnitCode,
+               DepartmentUnitName = x.Key.DepartmentUnitName,
+               SubUnitCode = x.Key.SubUnitCode,
+               SubUnitName = x.Key.SubUnitName,
+               
 
            });
 

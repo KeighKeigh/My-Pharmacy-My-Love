@@ -29,7 +29,9 @@ namespace ELIXIR.DATA.DTOs.ONECHARGING_DTOs
         public string location_code { get; set; }
         public string location_name { get; set; }
         public int? location_id { get; set; }
-        public string deleted_at { get; set; }
+        public DateTime? deleted_at { get; set; }
         public bool? IsActive { get; set; }
+        public DateTime? updated_at { get; set; }
+        public DateTime? added_at { get; set; }
     }
 }

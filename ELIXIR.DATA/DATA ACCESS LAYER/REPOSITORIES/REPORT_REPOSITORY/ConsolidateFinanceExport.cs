@@ -66,6 +66,12 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                         "Cip #",
                         "Helpdesk",
                         "Customer"
+                        //,"Business Unit Code"
+                        //,"Business Unit Name"
+                        //,"Department Unit Code"
+                        //,"Department Unit Name"
+                        //,"Sub Unit Code"
+                        //,"Sub Unit Name"
 
                     };
 
@@ -127,6 +133,13 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                         row.Cell(28).Value = consolidate[index - 1].CIPNo;
                         row.Cell(29).Value = consolidate[index - 1].Helpdesk;
                         row.Cell(30).Value = consolidate[index - 1].Customer;
+                        //row.Cell(31).Value = consolidate[index - 1].BusinessUnitCode;
+                        //row.Cell(32).Value = consolidate[index - 1].BusinessUnitName;
+                        //row.Cell(33).Value = consolidate[index - 1].DepartmentUnitCode;
+                        //row.Cell(34).Value = consolidate[index - 1].DepartmentUnitName;
+                        //row.Cell(35).Value = consolidate[index - 1].SubUnitCode;
+                        //row.Cell(36).Value = consolidate[index - 1].SubUnitName;
+
 
 
                     }

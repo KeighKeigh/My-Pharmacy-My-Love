@@ -44,5 +44,11 @@ namespace ELIXIR.DATA.DTOs.REPORT_DTOs
         public string Rush { get; set; }
         public string Formula { get; set; }
         public string Customer { get; set; }
+        public string BusinessUnitCode { get; set; }
+        public string BusinessUnitName { get; set; }
+        public string DepartmentUnitCode { get; set; }
+        public string DepartmentUnitName { get; set; }
+        public string SubUnitCode { get; set; }
+        public string SubUnitName { get; set; }
     }
 }

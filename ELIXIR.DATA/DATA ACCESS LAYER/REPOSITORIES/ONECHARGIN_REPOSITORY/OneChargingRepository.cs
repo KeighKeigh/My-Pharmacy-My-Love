@@ -63,7 +63,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ONECHARGIN_REPOSITORY
                 location_name = x.location_name,
                 location_id = x.location_id,
                 deleted_at = x.deleted_at,
-                IsActive = string.IsNullOrEmpty(x.deleted_at) ? false : true,
+                IsActive = x.deleted_at  != null ? false : true,
 
             }).ToList();
 
@@ -96,7 +96,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.ONECHARGIN_REPOSITORY
                     updatedata.location_name = datas.location_name;
                     updatedata.location_id = datas.location_id;
                     updatedata.deleted_at = datas.deleted_at;
-                    updatedata.IsActive = string.IsNullOrEmpty(datas.deleted_at) ? true : false;
+                    updatedata.IsActive = datas.deleted_at != null ? true : false;
                 }
 
             }

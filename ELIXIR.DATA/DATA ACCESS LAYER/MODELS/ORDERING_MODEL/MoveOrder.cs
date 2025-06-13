@@ -182,6 +182,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.MODELS.ORDERING_MODEL
         public string LocationName { get; set; }
         public string AccountCode { get; set; }
         public string AccountTitle { get; set; }
+        public string OneChargingCode { get; set; }
         public string OneChargingName { get; set; }
         public string BusinessUnitCode { get; set; }
         public string BusinessUnitName { get; set; }

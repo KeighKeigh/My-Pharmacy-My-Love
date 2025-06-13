@@ -153,168 +153,10 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 var receiptTask = await ReceiptTransactions(startDate, endDate);
                 var issueTask = await IssueTransactions(startDate, endDate);
                 var transformTask = await TransformTransactions(startDate, endDate);
-                var tranformFormula = await TransformationFormula(startDate, endDate);
-                var transformRecipe = await TransformationRecipe(startDate, endDate);
 
 
                 var consolidateList = moveOrderTask.Concat(receiptTask).Concat(issueTask)
                     .Concat(transformTask);
-
-                var formula = tranformFormula.SelectMany(x => new List<PGLResult>
-                {
-
-                    //debit
-                     new PGLResult
-                    {
-                        SyncId = "PH-" + (x.SyncId.ToString() ?? string.Empty) + "-D",
-                        Mark1 = x.Mark1 ?? string.Empty,
-                        Mark2 = x.Mark2 ?? string.Empty,
-                        AssetCIP = x.AssetCIP ?? string.Empty,
-                        AccountingTag = x.AccountingTag ?? string.Empty,
-                        TransactionDate = x.TransactionDate,
-                        ClientSupplier = x.ClientSupplier ?? string.Empty,
-                        AccountTitleCode = x.AccountTitleCode ?? string.Empty,
-                        AccountTitle = x.AccountTitle,
-                        CompanyCode = "0001",
-                        Company = "RDFFLFI",
-                        DivisionCode = x.DivisionCode ?? string.Empty,
-                        Division = x.Division ?? string.Empty,
-                        DepartmentCode = x.DepartmentCode ?? string.Empty,
-                        Department = x.Department ?? string.Empty,
-                        UnitCode = x.UnitCode ?? string.Empty,
-                        Unit = x.Unit ?? string.Empty,
-                        SubUnitCode = x.SubUnitCode ?? string.Empty,
-                        SubUnit = x.SubUnit ?? string.Empty,
-                        LocationCode = x.LocationCode ?? string.Empty,
-                        Location = x.Location ?? string.Empty,
-                        PONumber = x.PONumber ?? string.Empty,
-                        RRNumber = x.RRNumber ?? string.Empty,
-                        ReferenceNo = x.ReferenceNo ?? string.Empty,
-                        ItemCode = x.ItemCode ?? string.Empty,
-                        ItemDescription = x.ItemDescription ?? string.Empty,
-                        Quantity = x?.Quantity ?? 0,
-                        UOM = x.UOM ?? string.Empty,
-                        UnitPrice = x?.UnitPrice ?? 0,
-                        LineAmount = x?.LineAmount ?? 0,
-                        VoucherJournal = string.Empty,
-                        AccountType = "Inventoriables",
-                        DRCR = "Debit",
-                        AssetCode = x.AssetCode ?? string.Empty,
-                        Asset= x.Asset ?? string.Empty,
-                        ServiceProviderCode = x.ServiceProviderCode ?? string.Empty,
-                        ServiceProvider = x.ServiceProvider ?? string.Empty,
-                        BOA = "Inventoriables",
-                        Allocation = x.Allocation ?? string.Empty,
-                        AccountGroup = "Current Assets",
-                        AccountSubGroup = "Inventories",
-                        FinancialStatement = "Balance Sheet",
-                        UnitResponsible = "MAU",
-                        Batch = x.Batch ?? string.Empty,
-                        Remarks = x.Remarks ?? string.Empty,
-                        PayrollPeriod = x.PayrollPeriod ?? string.Empty,
-                        Position = x.Position ?? string.Empty,
-                        PayrollType = x.PayrollType ?? string.Empty,
-                        PayrollType2 = x.PayrollType2 ?? string.Empty,
-                        DepreciationDescription = x.DepreciationDescription ?? string.Empty,
-                        RemainingDepreciationValue = x.RemainingDepreciationValue ?? string.Empty,
-                        UsefulLife = x.UsefulLife ?? string.Empty,
-                        Month = x.TransactionDate.Value.ToString("MMM") ?? string.Empty,
-                        Year = x.TransactionDate.Value.ToString("yyyy") ?? string.Empty,
-                        Particulars = x.Particulars ?? string.Empty,
-                        Month2 = x.TransactionDate.Value.ToString("yyyyMM") ?? string.Empty,
-                        FarmType = x.FarmType ?? string.Empty,
-                        Adjustment = x.Adjustment ?? string.Empty,
-                        From = x.From ?? string.Empty,
-                        ChangeTo = x.ChangeTo ?? string.Empty,
-                        Reason = x.Reason ?? string.Empty,
-                        CheckingRemarks = x.CheckingRemarks ?? string.Empty,
-                        BankName = x.BankName ?? string.Empty,
-                        ChequeNumber = x.ChequeNumber ?? string.Empty,
-                        ChequeVoucherNumber = x.ChequeVoucherNumber ?? string.Empty,
-                        ReleasedDate = x.ReleasedDate ?? string.Empty,
-                        ChequeDate = x.ChequeDate ?? string.Empty,
-                        BOA2 = "Inventoriables",
-                        System = "Elixir - Pharmacy",
-                        Books = "Journal Book",
-                    } });
-
-                var recipe = transformRecipe.SelectMany(x => new List<PGLResult>
-                {
-
-                    //debit
-                     new PGLResult
-                    {
-                        SyncId = "PH-" + (x.SyncId.ToString() ?? string.Empty) + "-D",
-                        Mark1 = x.Mark1 ?? string.Empty,
-                        Mark2 = x.Mark2 ?? string.Empty,
-                        AssetCIP = x.AssetCIP ?? string.Empty,
-                        AccountingTag = x.AccountingTag ?? string.Empty,
-                        TransactionDate = x.TransactionDate,
-                        ClientSupplier = x.ClientSupplier ?? string.Empty,
-                        AccountTitleCode = x.AccountTitleCode ?? string.Empty,
-                        AccountTitle = x.AccountTitle,
-                        CompanyCode = "0001",
-                        Company = "RDFFLFI",
-                        DivisionCode = x.DivisionCode ?? string.Empty,
-                        Division = x.Division ?? string.Empty,
-                        DepartmentCode = x.DepartmentCode ?? string.Empty,
-                        Department = x.Department ?? string.Empty,
-                        UnitCode = x.UnitCode ?? string.Empty,
-                        Unit = x.Unit ?? string.Empty,
-                        SubUnitCode = x.SubUnitCode ?? string.Empty,
-                        SubUnit = x.SubUnit ?? string.Empty,
-                        LocationCode = x.LocationCode ?? string.Empty,
-                        Location = x.Location ?? string.Empty,
-                        PONumber = x.PONumber ?? string.Empty,
-                        RRNumber = x.RRNumber ?? string.Empty,
-                        ReferenceNo = x.ReferenceNo ?? string.Empty,
-                        ItemCode = x.ItemCode ?? string.Empty,
-                        ItemDescription = x.ItemDescription ?? string.Empty,
-                        Quantity = x?.Quantity ?? 0,
-                        UOM = x.UOM ?? string.Empty,
-                        UnitPrice = x?.UnitPrice ?? 0,
-                        LineAmount = x?.LineAmount ?? 0,
-                        VoucherJournal = string.Empty,
-                        AccountType = "Inventoriables",
-                        DRCR = "Debit",
-                        AssetCode = x.AssetCode ?? string.Empty,
-                        Asset= x.Asset ?? string.Empty,
-                        ServiceProviderCode = x.ServiceProviderCode ?? string.Empty,
-                        ServiceProvider = x.ServiceProvider ?? string.Empty,
-                        BOA = "Inventoriables",
-                        Allocation = x.Allocation ?? string.Empty,
-                        AccountGroup = "Current Assets",
-                        AccountSubGroup = "Inventories",
-                        FinancialStatement = "Balance Sheet",
-                        UnitResponsible = "MAU",
-                        Batch = x.Batch ?? string.Empty,
-                        Remarks = x.Remarks ?? string.Empty,
-                        PayrollPeriod = x.PayrollPeriod ?? string.Empty,
-                        Position = x.Position ?? string.Empty,
-                        PayrollType = x.PayrollType ?? string.Empty,
-                        PayrollType2 = x.PayrollType2 ?? string.Empty,
-                        DepreciationDescription = x.DepreciationDescription ?? string.Empty,
-                        RemainingDepreciationValue = x.RemainingDepreciationValue ?? string.Empty,
-                        UsefulLife = x.UsefulLife ?? string.Empty,
-                        Month = x.TransactionDate.Value.ToString("MMM") ?? string.Empty,
-                        Year = x.TransactionDate.Value.ToString("yyyy") ?? string.Empty,
-                        Particulars = x.Particulars ?? string.Empty,
-                        Month2 = x.TransactionDate.Value.ToString("yyyyMM") ?? string.Empty,
-                        FarmType = x.FarmType ?? string.Empty,
-                        Adjustment = x.Adjustment ?? string.Empty,
-                        From = x.From ?? string.Empty,
-                        ChangeTo = x.ChangeTo ?? string.Empty,
-                        Reason = x.Reason ?? string.Empty,
-                        CheckingRemarks = x.CheckingRemarks ?? string.Empty,
-                        BankName = x.BankName ?? string.Empty,
-                        ChequeNumber = x.ChequeNumber ?? string.Empty,
-                        ChequeVoucherNumber = x.ChequeVoucherNumber ?? string.Empty,
-                        ReleasedDate = x.ReleasedDate ?? string.Empty,
-                        ChequeDate = x.ChequeDate ?? string.Empty,
-                        BOA2 = "Inventoriables",
-                        System = "Elixir - Pharmacy",
-                        Books = "Journal Book",
-                    } }).Union(formula);
 
                 var result = consolidateList.SelectMany(x => new List<PGLResult>
                 {
@@ -643,59 +485,59 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                 
                 return await result.ToListAsync();
             }
-            private async Task<List<PGLResult>> TransformTransactions(DateTime startDate, DateTime endDate)
-            {
+            //private async Task<List<PGLResult>> TransformTransactions(DateTime startDate, DateTime endDate)
+            //{
 
 
 
-                var result = _context.Transformation_Preparation
-                .AsNoTracking()
-                .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
-                .SelectMany(
-                    x => x.w.DefaultIfEmpty(),
-                    (x, w) => new { m = x.m, w })
-                .GroupJoin(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p, po })
-                .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new { x.p.m, x.p.w, posummary })
-                .GroupJoin(_context.RawMaterials, warehouse => warehouse.w.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
-                .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
-                .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
-                .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
-                .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate.AddDays(1) && t.m.PreparedDate < endDate)
-                .Select(x => new PGLResult
-                {
-                    SyncId = "T-" + x.m.Id.ToString(),
-                    TransactionDate = x.m.PreparedDate,
-                    ItemCode = x.m.ItemCode,
-                    ItemDescription = x.m.ItemDescription,
-                    UOM = "KG",
-                    PONumber = "",
-                    Quantity = Math.Round(x.m.QuantityNeeded, 2),
-                    UnitPrice = x.posummary.UnitPrice,
-                    LineAmount = (Math.Round(x.m.QuantityNeeded, 2)) * x.posummary.UnitPrice,
-                    //Source = x.Id.ToString(),
-                    CheckingRemarks = "Transformation",
-                    //Status = "",
-                    //Reason = "",
-                    Remarks = "",
-                    //SupplierName = "",
+            //    var result = _context.Transformation_Preparation
+            //    .AsNoTracking()
+            //    .GroupJoin(_context.WarehouseReceived, m => m.WarehouseId, w => w.Id, (m, w) => new { m, w })
+            //    .SelectMany(
+            //        x => x.w.DefaultIfEmpty(),
+            //        (x, w) => new { m = x.m, w })
+            //    .GroupJoin(_context.POSummary, x => x.w.PO_Number, po => po.PO_Number, (p, po) => new { p, po })
+            //    .SelectMany(x => x.po.DefaultIfEmpty(), (x, posummary) => new { x.p.m, x.p.w, posummary })
+            //    .GroupJoin(_context.RawMaterials, warehouse => warehouse.w.ItemCode, rawmaterials => rawmaterials.ItemCode, (warehouse, rawmaterials) => new { warehouse, rawmaterials })
+            //    .SelectMany(x => x.rawmaterials.DefaultIfEmpty(), (x, rawmaterials) => new { x.warehouse.m, x.warehouse.w, x.warehouse.posummary, rawmaterials })
+            //    .GroupJoin(_context.ItemCategories, rawmaterials => rawmaterials.rawmaterials.ItemCategoryId, itemcategory => itemcategory.Id, (rawmaterials, itemcateogry) => new { rawmaterials, itemcateogry })
+            //    .SelectMany(x => x.itemcateogry.DefaultIfEmpty(), (x, itemcategory) => new { x.rawmaterials.m, x.rawmaterials.w, x.rawmaterials.posummary, x.rawmaterials.rawmaterials, itemcategory })
+            //    .Where(t => t.m.IsActive && t.m.PreparedDate >= startDate.AddDays(1) && t.m.PreparedDate < endDate)
+            //    .Select(x => new PGLResult
+            //    {
+            //        SyncId = "T-" + x.m.Id.ToString(),
+            //        TransactionDate = x.m.PreparedDate,
+            //        ItemCode = x.m.ItemCode,
+            //        ItemDescription = x.m.ItemDescription,
+            //        UOM = "KG",
+            //        PONumber = "",
+            //        Quantity = Math.Round(x.m.QuantityNeeded, 2),
+            //        UnitPrice = x.posummary.UnitPrice,
+            //        LineAmount = (Math.Round(x.m.QuantityNeeded, 2)) * x.posummary.UnitPrice,
+            //        //Source = x.Id.ToString(),
+            //        CheckingRemarks = "Transformation",
+            //        //Status = "",
+            //        //Reason = "",
+            //        Remarks = "",
+            //        //SupplierName = "",
                     
-                    ServiceProvider = x.m.PreparedBy,
-                    CompanyCode = "10",
-                    Company = "RDF Corporate Services",
-                    DepartmentCode = "0010",
-                    Department = "Corporate Common",
-                    LocationCode = "0001",
-                    Location = "Head Office",
-                    AccountTitleCode = "115998",
-                    AccountTitle = "Materials & Supplies Inventory",
+            //        ServiceProvider = x.m.PreparedBy,
+            //        CompanyCode = "10",
+            //        Company = "RDF Corporate Services",
+            //        DepartmentCode = "0010",
+            //        Department = "Corporate Common",
+            //        LocationCode = "0001",
+            //        Location = "Head Office",
+            //        AccountTitleCode = "115998",
+            //        AccountTitle = "Materials & Supplies Inventory",
 
 
-                    AssetCIP = "",
-                    RRNumber = "0",
+            //        AssetCIP = "",
+            //        RRNumber = "0",
 
-                });
-                return await result.ToListAsync();
-            }
+            //    });
+            //    return await result.ToListAsync();
+            //}
             
 
             private async Task<List<PGLResult>> TransformationFormula(DateTime startDate, DateTime endDate)
@@ -738,47 +580,152 @@ namespace ELIXIR.API.Controllers.PGL_CONTROLLER
                               };
 
                 return await result.ToListAsync();
+
+                //var result = from tp2 in _context.Transformation_Planning
+                //             join tp in _context.Transformation_Preparation on tp2.Id equals tp.TransformId
+                //             join po in _context.POSummary on tp2.ItemCode equals po.ItemCode into posJoin
+                //             from po in posJoin.DefaultIfEmpty()
+                //             where tp2.Status == true && tp.IsActive == true && tp.IsMixed == true
+                //             group tp by new { tp.TransformId, tp.ItemCode, tp.QuantityNeeded, tp.ItemDescription, tp2.Version, tp2.Batch, po.UnitPrice, tp2.AddedBy, tp2.ProdPlan, } into g
+                //             select new PGLResult
+                //             {
+                //                 SyncId = "T-" + g.Key.TransformId.ToString(),
+                //                 TransactionDate = g.Key.ProdPlan,
+                //                 ItemCode = g.Key.ItemCode,
+                //                 ItemDescription = g.Key.ItemDescription,
+                //                 UOM = "KG",
+                //                 PONumber = "",
+                //                 Quantity = g.Key.QuantityNeeded,
+                //                 UnitPrice = g.Key.UnitPrice,
+                //                 LineAmount = (Math.Round(g.Key.QuantityNeeded, 2)) * g.Key.UnitPrice,
+
+                //                 CheckingRemarks = "Transformation (Formula)",
+                //                 Remarks = "",
+
+                //                 ServiceProvider = g.Key.AddedBy,
+                //                 CompanyCode = "10",
+                //                 Company = "RDF Corporate Services",
+                //                 DepartmentCode = "0010",
+                //                 Department = "Corporate Common",
+                //                 LocationCode = "0001",
+                //                 Location = "Head Office",
+                //                 AccountTitleCode = "115998",
+                //                 AccountTitle = "Materials & Supplies Inventory",
+
+
+                //                 AssetCIP = "",
+                //                 RRNumber = "0",
+
+                //             };
             }
-            private async Task<List<PGLResult>> TransformationRecipe(DateTime startDate, DateTime endDate)
+            private async Task<List<PGLResult>> TransformTransactions(DateTime startDate, DateTime endDate)
             {
-                var result = from tp2 in _context.Transformation_Planning
-                             join tp in _context.Transformation_Preparation on tp2.Id equals tp.TransformId
-                             join po in _context.POSummary on tp2.ItemCode equals po.ItemCode into posJoin
-                             from po in posJoin.DefaultIfEmpty()
-                             where tp2.Status == true && tp.IsActive == true && tp.IsMixed == true
-                             group tp by new { tp.TransformId, tp.ItemCode, tp.QuantityNeeded, tp.ItemDescription, tp2.Version, tp2.Batch, po.UnitPrice, tp2.AddedBy, tp2.ProdPlan, } into g
-                             select new PGLResult
-                             {
-                                 SyncId = "T-" + g.Key.TransformId.ToString(),
-                                 TransactionDate = g.Key.ProdPlan,
-                                 ItemCode = g.Key.ItemCode,
-                                 ItemDescription = g.Key.ItemDescription,
-                                 UOM = "KG",
-                                 PONumber = "",
-                                 Quantity = g.Key.QuantityNeeded,
-                                 UnitPrice = g.Key.UnitPrice,
-                                 LineAmount = (Math.Round(g.Key.QuantityNeeded, 2)) * g.Key.UnitPrice,
-
-                                 CheckingRemarks = "Transformation (Formula)",
-                                 Remarks = "",
-
-                                 ServiceProvider = g.Key.AddedBy,
-                                 CompanyCode = "10",
-                                 Company = "RDF Corporate Services",
-                                 DepartmentCode = "0010",
-                                 Department = "Corporate Common",
-                                 LocationCode = "0001",
-                                 Location = "Head Office",
-                                 AccountTitleCode = "115998",
-                                 AccountTitle = "Materials & Supplies Inventory",
+                
 
 
-                                 AssetCIP = "",
-                                 RRNumber = "0",
+                var result = (from tp in _context.Transformation_Planning
+                              where tp.Status == true
+                              join warehouse in _context.WarehouseReceived on tp.Id equals warehouse.TransformId
+                              join posummary in _context.POSummary on tp.ItemCode equals posummary.ItemCode into posJoin
+                              from posummary in posJoin.DefaultIfEmpty()
+                              where warehouse.ReceivingDate.Date >= startDate && warehouse.ReceivingDate.Date <= endDate
 
-                             };
+                              select new PGLResult
+                              {
+                                  SyncId = "T-" + tp.Id.ToString(),
+                                  TransactionDate = warehouse.ReceivingDate,
+                                  ItemCode = tp.ItemCode,
+                                  ItemDescription = tp.ItemDescription,
+                                  UOM = "KG",
+                                  PONumber = "",
+                                  Quantity = tp.Batch * tp.Quantity,
+                                  UnitPrice = posummary.UnitPrice,
+                                  LineAmount = (Math.Round(tp.Batch * tp.Quantity, 2)) * posummary.UnitPrice,
 
-                return await result.ToListAsync();
+                                  CheckingRemarks = "Transformation (Formula)",
+                                  Remarks = "",
+
+                                  ServiceProvider = tp.AddedBy,
+                                  CompanyCode = "10",
+                                  Company = "RDF Corporate Services",
+                                  DepartmentCode = "0010",
+                                  Department = "Corporate Common",
+                                  LocationCode = "0001",
+                                  Location = "Head Office",
+                                  AccountTitleCode = "115998",
+                                  AccountTitle = "Materials & Supplies Inventory",
+
+
+                                  AssetCIP = "",
+                                  RRNumber = "0",
+
+                              }).Union(
+             from tp2 in _context.Transformation_Planning
+             join tp in _context.Transformation_Preparation on tp2.Id equals tp.TransformId
+             join po in _context.POSummary on tp2.ItemCode equals po.ItemCode into posJoin
+             from po in posJoin.DefaultIfEmpty()
+             where tp2.Status == true && tp.IsActive == true && tp.IsMixed == true && tp2.ProdPlan.Date >= startDate && tp2.ProdPlan.Date <= endDate
+             group tp by new { tp.TransformId, tp.ItemCode, tp.QuantityNeeded, tp.ItemDescription, tp2.Version, tp2.Batch, po.UnitPrice, tp2.AddedBy, tp2.ProdPlan } into g
+             select new PGLResult
+             {
+                 SyncId = "T-" + g.Key.TransformId.ToString(),
+                 TransactionDate = g.Key.ProdPlan,
+                 ItemCode = g.Key.ItemCode,
+                 ItemDescription = g.Key.ItemDescription,
+                 UOM = "KG",
+                 PONumber = "",
+                 Quantity = g.Key.QuantityNeeded,
+                 UnitPrice = g.Key.UnitPrice,
+                 LineAmount = -(Math.Round(g.Key.QuantityNeeded, 2)) * g.Key.UnitPrice,
+
+                 CheckingRemarks = "Transformation (Recipe)",
+                 Remarks = "",
+
+                 ServiceProvider = g.Key.AddedBy,
+                 CompanyCode = "10",
+                 Company = "RDF Corporate Services",
+                 DepartmentCode = "0010",
+                 Department = "Corporate Common",
+                 LocationCode = "0001",
+                 Location = "Head Office",
+                 AccountTitleCode = "115998",
+                 AccountTitle = "Materials & Supplies Inventory",
+
+
+                 AssetCIP = "",
+                 RRNumber = "0",
+
+             });
+
+                var final = result.Select(x => new PGLResult
+                {
+                    SyncId = x.SyncId,
+                    TransactionDate = x.TransactionDate,
+                    ItemCode = x.ItemCode,
+                    ItemDescription = x.ItemDescription,
+                    UOM = x.UOM,
+                    PONumber = x.PONumber,
+                    Quantity = x.Quantity,
+                    UnitPrice = x.UnitPrice,
+                    LineAmount = x.UnitPrice,
+                    CheckingRemarks = x.CheckingRemarks,
+                    Remarks = x.Remarks,
+                    ServiceProvider = x.ServiceProvider,
+                    CompanyCode = x.CompanyCode,
+                    Company = x.Company,
+                    DepartmentCode = x.DepartmentCode,
+                    Department = x.Department,
+                    LocationCode = x.LocationCode,
+                    Location = x.Location,
+                    AccountTitleCode = x.AccountTitleCode,
+                    AccountTitle = x.AccountTitle,
+                    AssetCIP = x.AssetCIP,
+                    RRNumber = x.RRNumber,
+
+                });
+
+
+                return await final.ToListAsync();
             }
 
         }

@@ -443,7 +443,19 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                               BatchNo = moveorder.BatchNo,
                               TransactedBy = transactmoveorder.PreparedBy,
                               TransactedDate = transactmoveorder.PreparedDate.ToString(),
-                              OrderRemarks = moveorder.OrderRemarks
+                              OrderRemarks = moveorder.OrderRemarks,
+                              DepartmentCode = moveorder.DepartmentCode,
+                              DepartmentName = moveorder.DepartmentName,
+                              LocationCode = moveorder.LocationCode,
+                              LocationName = moveorder.LocationName,
+                              CompanyCode = moveorder.CompanyCode,
+                              CompanyName = moveorder.CompanyName,
+                              BusinessUnitCode = moveorder.BusinessUnitCode,
+                              BusinessUnitName = moveorder.BusinessUnitName,
+                              SubUnitCode = moveorder.SubUnitCode,
+                              SubUnitName = moveorder.SubUnitName,
+                              AccountCode = moveorder.AccountCode,
+                              AccountTitle = moveorder.AccountTitle,
                           });
 
             return await orders.ToListAsync();
@@ -476,7 +488,19 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                 ExpirationDate = receipt.Expiration.ToString(),
                                 TransactBy = receiptHeader.PreparedBy,
                                 TransactDate = receipt.ReceivingDate.ToString(),
-                                TransactionDate = receiptHeader.TransactionDate.ToString()
+                                TransactionDate = receiptHeader.TransactionDate.ToString(),
+                                DepartmentCode = receiptHeader.DepartmentCode,
+                                DepartmentName = receiptHeader.DepartmentName,
+                                LocationCode = receiptHeader.LocationCode,
+                                LocationName = receiptHeader.LocationName,
+                                CompanyCode = receiptHeader.CompanyCode,
+                                CompanyName = receiptHeader.CompanyName,
+                                BusinessUnitCode = receiptHeader.BusinessUnitCode,
+                                BusinessUnitName = receiptHeader.BusinessUnitName,
+                                SubUnitCode = receiptHeader.SubUnitCode,
+                                SubUnitName = receiptHeader.SubUnitName,
+                                AccountCode = receiptHeader.AccountCode,
+                                AccountTitle = receiptHeader.AccountTitle,
 
                             });
 
@@ -510,7 +534,19 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                               ExpirationDate = issuedetails != null ? issuedetails.ExpirationDate.ToString() : null,
                               TransactBy = issue.PreparedBy,
                               TransactDate = issuedetails != null ? issuedetails.PreparedDate.ToString() : null,
-                              TransactionDate = issue.TransactionDate.ToString()
+                              TransactionDate = issue.TransactionDate.ToString(),
+                              DepartmentCode = issue.DepartmentCode,
+                              DepartmentName = issue.DepartmentName,
+                              LocationCode = issue.LocationCode,
+                              LocationName = issue.LocationName,
+                              CompanyCode = issue.CompanyCode,
+                              CompanyName = issue.CompanyName,
+                              BusinessUnitCode = issue.BusinessUnitCode,
+                              BusinessUnitName = issue.BusinessUnitName,
+                              SubUnitCode = issue.SubUnitCode,
+                              SubUnitName = issue.SubUnitName,
+                              AccountCode = issue.AccountCode,
+                              AccountTitle = issue.AccountTitle,
 
                           });
 
@@ -668,8 +704,23 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                               moveorder.BatchNo,
                               DeliveryDate = transact.DeliveryDate.ToString(),
                               moveorder.OrderRemarks,
-                              moveorder.Remarks
-                              
+                              moveorder.Remarks,
+                              moveorder.LocationName,
+                              moveorder.LocationCode,
+                              moveorder.CompanyName,
+                              moveorder.CompanyCode,
+                              moveorder.DepartmentCode,
+                              moveorder.DepartmentName,
+                              moveorder.BusinessUnitCode,
+                              moveorder.BusinessUnitName,
+                              moveorder.DepartmentUnitCode,
+                              moveorder.DepartmentUnitName,
+                              moveorder.SubUnitCode,
+                              moveorder.SubUnitName,
+                              moveorder.AccountCode,
+                              moveorder.AccountTitle,
+
+
                           } into total
 
                           select new MoveOrderReport
@@ -688,8 +739,23 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                               BatchNo = total.Key.BatchNo,
                               DeliveryDate = total.Key.DeliveryDate,
                              OrderRemarks = total.Key.OrderRemarks,
-                             Remarks = total.Key.Remarks
-                             
+                             Remarks = total.Key.Remarks,
+
+                              DepartmentCode = total.Key.DepartmentCode,
+                              DepartmentName = total.Key.DepartmentName,
+                              CompanyCode = total.Key.CompanyCode,
+                              CompanyName = total.Key.CompanyName,
+                              LocationCode = total.Key.LocationCode,
+                              LocationName = total.Key.LocationName,
+                              AccountCode = total.Key.AccountCode,
+                              AccountTitle = total.Key.AccountTitle,
+                              BusinessUnitCode = total.Key.BusinessUnitCode,
+                              BusinessUnitName = total.Key.BusinessUnitName,
+                              DepartmentUnitCode = total.Key.DepartmentUnitCode,
+                              DepartmentUnitName = total.Key.DepartmentUnitName,
+                              SubUnitCode = total.Key.SubUnitCode,
+                              SubUnitName = total.Key.SubUnitName,
+
                           }).OrderBy(x => x.TransactedDate);
         
             return await orders.ToListAsync();
@@ -715,7 +781,21 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                               QuantityOrdered = ordering.QuantityOrdered,
                               CancelledDate = ordering.CancelDate.ToString(),
                               CancelledBy = ordering.IsCancelBy,
-                              Reason = ordering.Remarks
+                              Reason = ordering.Remarks,
+                              DepartmentCode = ordering.DepartmentCode,
+                              DepartmentName = ordering.DepartmentName,
+                              LocationCode = ordering.LocationCode,
+                              LocationName = ordering.LocationName,
+                              CompanyCode = ordering.CompanyCode,
+                              CompanyName = ordering.CompanyName,
+                              AccountCode = ordering.AccountCode,
+                              AccountTitle = ordering.AccountTitle,
+                              BusinessUnitCode = ordering.BusinessUnitCode,
+                              BusinessUnitName = ordering.BusinessUnitName,
+                              DepartmentUnitCode = ordering.DepartmentUnitCode,
+                              DepartmentUnitName = ordering.DepartmentUnitName,
+                              SubUnitCode = ordering.SubUnitCode,
+                              SubUnitName = ordering.SubUnitName,
                           });
 
             return await orders.ToListAsync();
@@ -1364,12 +1444,18 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                       Reference = m.OrderNo.ToString(),
                                       SupplierName = w.Supplier,
                                       EncodedBy = t.PreparedBy,
-                                      CompanyCode = "10",
-                                      CompanyName = "RDF Corporate Services",
-                                      DepartmentCode = "2101",
-                                      DepartmentName = "FEEDMILL RM WAREHOUSE",
-                                      LocationCode = "1001",
-                                      LocationName = "FM - LARA",
+                                      CompanyCode = m.CompanyCode,
+                                      CompanyName = m.CompanyName,
+                                      DepartmentCode = m.DepartmentCode,
+                                      DepartmentName = m.DepartmentName,
+                                      LocationCode = m.LocationCode,
+                                      LocationName = m.LocationName,
+                                      BusinessUnitCode = m.BusinessUnitCode,
+                                      BusinessUnitName = m.BusinessUnitName,
+                                      DepartmentUnitCode = m.DepartmentUnitCode,
+                                      DepartmentUnitName = m.DepartmentUnitName,
+                                      SubUnitCode = m.SubUnitCode,
+                                      SubUnitName = m.SubUnitName,
                                       AccountTitle = m.Category == "DISINFECTANT"
                                        || m.Category == "SOLUBLE ANTIBIOTICS"
                                        || m.Category == "SUPPLIMENTS"
@@ -1418,12 +1504,18 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Reference = x.receipt.Details,
                     SupplierName = x.receipt.Supplier,
                     EncodedBy = x.receipt.PreparedBy,
-                    CompanyCode = "10",
-                    CompanyName = "RDF Corporate Services",
-                    DepartmentCode = "2101",
-                    DepartmentName = "FEEDMILL RM WAREHOUSE",
-                    LocationCode = "1001",
-                    LocationName = "FM - LARA",
+                    CompanyCode = x.receipt.CompanyCode,
+                    CompanyName = x.receipt.CompanyName,
+                    DepartmentCode = x.receipt.DepartmentCode,
+                    DepartmentName = x.receipt.DepartmentName,
+                    LocationCode = x.receipt.LocationCode,
+                    LocationName = x.receipt.LocationName,
+                    BusinessUnitCode = x.receipt.BusinessUnitCode,
+                    BusinessUnitName = x.receipt.BusinessUnitName,
+                    DepartmentUnitCode = x.receipt.DepartmentUnitCode,
+                    DepartmentUnitName = x.receipt.DepartmentUnitName,
+                    SubUnitCode = x.receipt.SubUnitCode,
+                    SubUnitName = x.receipt.SubUnitName,
                     AccountTitle = "Inventory Transfer",
                     AccountTitleCode = "115999",
                     EmpId = "",
@@ -1480,12 +1572,18 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Reference = x.miscDetail.Details,
                     SupplierName = x.ware.Supplier,
                     EncodedBy = x.issue.PreparedBy,
-                    CompanyCode = "10",
-                    CompanyName = "RDF Corporate Services",
-                    DepartmentCode = "2101",
-                    DepartmentName = "FEEDMILL RM WAREHOUSE",
-                    LocationCode = "1001",
-                    LocationName = "FM - LARA",
+                    CompanyCode = x.miscDetail.CompanyCode,
+                    CompanyName = x.miscDetail.CompanyName,
+                    DepartmentCode = x.miscDetail.DepartmentCode,
+                    DepartmentName = x.miscDetail.DepartmentName,
+                    LocationCode = x.miscDetail.LocationCode,
+                    LocationName = x.miscDetail.LocationName,
+                    BusinessUnitCode = x.miscDetail.BusinessUnitCode,
+                    BusinessUnitName = x.miscDetail.BusinessUnitName,
+                    DepartmentUnitCode = x.miscDetail.DepartmentUnitCode,
+                    DepartmentUnitName = x.miscDetail.DepartmentUnitName,
+                    SubUnitCode = x.miscDetail.SubUnitCode,
+                    SubUnitName = x.miscDetail.SubUnitName,
                     AccountTitle = "Inventory Transfer",
                     AccountTitleCode = "115999",
                     EmpId = "",
@@ -1776,6 +1874,12 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 DepartmentName = consol.DepartmentName,
                 LocationCode = consol.LocationCode,
                 LocationName = consol.LocationName,
+                BusinessUnitName = consol.BusinessUnitName,
+                BusinessUnitCode = consol.BusinessUnitCode,
+                DepartmentUnitCode = consol.DepartmentUnitCode,
+                DepartmentUnitName = consol.DepartmentUnitName,
+                SubUnitCode = consol.SubUnitCode,
+                SubUnitName = consol.SubUnitName,
                 AccountTitleCode = consol.AccountTitleCode,
                 AccountTitle = consol.AccountTitle,
                 EmpId = consol.EmpId,
@@ -1885,12 +1989,19 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                                       Reference = m.Remarks,
                                       SupplierName = string.Empty,
                                       EncodedBy = t.PreparedBy,
-                                      CompanyCode = "10",
-                                      CompanyName = "RDF Corporate Services",
-                                      DepartmentCode = "0010",
-                                      DepartmentName = "Corporate Common",
-                                      LocationCode = "0001",
-                                      LocationName = "Head Office",
+                                      CompanyCode = m.CompanyCode,
+                                      CompanyName = m.CompanyCode,
+                                      DepartmentCode = m.DepartmentCode,
+                                      DepartmentName = m.DepartmentName,
+                                      LocationCode = m.LocationCode,
+                                      LocationName = m.LocationName,
+                                      BusinessUnitCode = m.BusinessUnitCode,
+                                      BusinessUnitName = m.BusinessUnitName,
+                                      DepartmentUnitCode = m.DepartmentUnitCode,
+                                      DepartmentUnitName = m.DepartmentUnitName,
+                                      SubUnitName = m.SubUnitName,
+                                      SubUnitCode = m.SubUnitCode,
+
                                       AccountTitle = m.Category == "DISINFECTANT"
                                        || m.Category == "SOLUBLE ANTIBIOTICS"
                                        || m.Category == "SUPPLIMENTS"
@@ -1939,12 +2050,18 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Reference = x.receipt.Details,
                     SupplierName = x.receipt.Supplier,
                     EncodedBy = x.receipt.PreparedBy,
-                    CompanyCode = "10",
-                    CompanyName = "RDF Corporate Services",
-                    DepartmentCode = "0010",
-                    DepartmentName = "Corporate Common",
-                    LocationCode = "0001",
-                    LocationName = "Head Office",
+                    CompanyCode = x.receipt.CompanyCode,
+                    CompanyName = x.receipt.CompanyName,
+                    DepartmentCode = x.receipt.DepartmentCode,
+                    DepartmentName = x.receipt.DepartmentName,
+                    LocationCode = x.receipt.LocationCode,
+                    LocationName = x.receipt.LocationName,
+                    BusinessUnitCode = x.receipt.BusinessUnitCode,
+                    BusinessUnitName = x.receipt.BusinessUnitName,
+                    DepartmentUnitCode = x.receipt.DepartmentUnitCode,
+                    DepartmentUnitName = x.receipt.DepartmentUnitName,
+                    SubUnitName = x.receipt.SubUnitName,
+                    SubUnitCode = x.receipt.SubUnitCode,
                     AccountTitleCode = "",
                     AccountTitle = "",
                     EmpId = "",
@@ -1998,12 +2115,18 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Reference = x.miscDetail.Details,
                     SupplierName = "",
                     EncodedBy = x.issue.PreparedBy,
-                    CompanyCode = "10",
-                    CompanyName = "RDF Corporate Services",
-                    DepartmentCode = "0010",
-                    DepartmentName = "Corporate Common",
-                    LocationCode = "0001",
-                    LocationName = "Head Office",
+                    CompanyCode = x.miscDetail.CompanyCode,
+                    CompanyName = x.miscDetail.CompanyName,
+                    DepartmentCode = x.miscDetail.DepartmentCode,
+                    DepartmentName = x.miscDetail.DepartmentName,
+                    LocationCode = x.miscDetail.LocationCode,
+                    LocationName = x.miscDetail.LocationName,
+                    BusinessUnitCode = x.miscDetail.BusinessUnitCode,
+                    BusinessUnitName = x.miscDetail.BusinessUnitName,
+                    DepartmentUnitCode = x.miscDetail.DepartmentUnitCode,
+                    DepartmentUnitName = x.miscDetail.DepartmentUnitName,
+                    SubUnitName = x.miscDetail.SubUnitName,
+                    SubUnitCode = x.miscDetail.SubUnitCode,
                     AccountTitleCode = "",
                     AccountTitle = "",
                     EmpId = "",
@@ -2014,83 +2137,88 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                     Rush = ""
                 });
 
-            var raw = (from m in _context.Transformation_Preparation.AsNoTracking()
-                       join w in _context.WarehouseReceived on m.WarehouseId equals w.Id into wj
-                       from w in wj.DefaultIfEmpty()
+            var result = (from tp in _context.Transformation_Planning
+                          where tp.Status == true
+                          join warehouse in _context.WarehouseReceived on tp.Id equals warehouse.TransformId
+                          //join posummary in _context.POSummary on tp.ItemCode equals posummary.ItemCode into posJoin
+                          //from posummary in posJoin.DefaultIfEmpty()
 
-                       join po in _context.POSummary on w.PO_Number equals po.PO_Number into poj
-                       from po in poj.DefaultIfEmpty()
+                          select new
+                          {
+                              TransformId = tp.Id,
+                              ItemCode = tp.ItemCode,
+                              ItemDescription = tp.ItemDescription,
+                              ActualQuantity = tp.Batch * tp.Quantity,
+                              TotalQuantity = tp.Batch * tp.Quantity,
+                              Category = "Formula",
+                              ProdPlan = tp.ProdPlan,
+                              DateTransformed = warehouse.ReceivingDate.ToString(),
+                              Version = tp.Version,
+                              Batch = tp.Batch,
+                              //UnitPrice = posummary.UnitPrice,
+                              PreparedBy = tp.AddedBy,
 
 
 
 
-                       join tr in _context.Transformation_Request on m.TransformId equals tr.TransformId into trj
-                       from tr in trj.DefaultIfEmpty()
 
-                       join f in _context.Formulas on tr.Version equals f.Version into fj
-                       from f in fj.DefaultIfEmpty()
+                          }).Union(
+             from tp2 in _context.Transformation_Planning
+             join tp in _context.Transformation_Preparation on tp2.Id equals tp.TransformId
+             join po in _context.POSummary on tp2.ItemCode equals po.ItemCode into posJoin
+             from po in posJoin.DefaultIfEmpty()
+             where tp2.Status == true && tp.IsActive == true && tp.IsMixed == true
+             group tp by new { tp.TransformId, tp.ItemCode, tp.QuantityNeeded, tp.ItemDescription, tp2.Version, tp2.Batch, po.UnitPrice, tp2.AddedBy, tp2.ProdPlan } into g
+             select new
+             {
+                 TransformId = g.Key.TransformId,
+                 ItemCode = g.Key.ItemCode,
+                 ItemDescription = g.Key.ItemDescription,
+                 ActualQuantity = g.Sum(x => x.WeighingScale),
+                 TotalQuantity = g.Key.QuantityNeeded,
+                 Category = "Recipe",
+                 ProdPlan = g.Key.ProdPlan,
+                 DateTransformed = (string)null,
+                 Version = g.Key.Version,
+                 Batch = g.Key.Batch,
+                 //UnitPrice = g.Key.UnitPrice,
+                 PreparedBy = g.Key.AddedBy
 
-                       join fr in _context.FormulaRequirements on f.Id equals fr.TransformationFormulaId into frj
-                       from fr in frj.DefaultIfEmpty()
+             });
 
-                       join rm in _context.RawMaterials on fr.RawMaterialId equals rm.Id into rmj
-                       from rm in rmj.DefaultIfEmpty()
+            var final = result.Select(x => new ConsolidateAuditReportDto
+            {
+                Id = x.TransformId,
+                TransactionDate = x.ProdPlan.Date.ToString("yyyy-MM-dd"),
+                ItemCode = x.ItemCode,
+                ItemDescription = x.ItemDescription,
+                Uom = "KG",
+                Category = x.Category,
+                Quantity = x.TotalQuantity,
+                //UnitCost = x.UnitPrice,
+                //LineAmount = (x.UnitPrice * (Math.Round(x.TotalQuantity, 2))) == 0 ? 1 : 1,
+                Source = "",
+                TransactionType = "Transformation",
+                Reason = "",
+                Reference = "",
+                SupplierName = "",
+                EncodedBy = x.PreparedBy,
+                CompanyCode = "10",
+                CompanyName = "RDF Corporate Services",
+                DepartmentCode = "2101",
+                DepartmentName = "FEEDMILL RM WAREHOUSE",
+                LocationCode = "1001",
+                LocationName = "FM - LARA",
+                AccountTitle = "Inventory Transfer",
+                AccountTitleCode = "115999",
+                EmpId = "",
+                Fullname = x.PreparedBy,
+                AssetTag = "",
+                CIPNo = "",
+                Helpdesk = 0,
+                Rush = "",
 
-                       join cat in _context.ItemCategories on rm.ItemCategoryId equals cat.Id into catj
-                       from cat in catj.DefaultIfEmpty()
-
-                       where m.IsActive
-                       select new
-                       {
-                           m,
-                           w,
-                           po,
-                           rm,
-                           cat,
-                           tr,
-                           f,
-                           fr
-                       }).ToList();
-
-            var transformConsol = raw
-           .GroupBy(x => x.m.Id)
-           .Select(g => new ConsolidateAuditReportDto
-           {
-               Id = g.Key,
-               TransactionDate = g.First().m.PreparedDate.ToString("yyyy-MM-dd"),
-               ItemCode = g.First().m.ItemCode,
-               ItemDescription = g.First().m.ItemDescription,
-               Uom = "KG",
-               Category = g.First().cat?.ItemCategoryName,
-               Quantity = Math.Round(g.First().m.QuantityNeeded, 2),
-               UnitCost = g.First().po?.UnitPrice ?? 0,
-               LineAmount = (g.First().po?.UnitPrice ?? 0) * Math.Round(g.First().m.QuantityNeeded, 2),
-               SupplierName = g.First().w?.Supplier,
-               EncodedBy = g.First().m.PreparedBy,
-               CompanyCode = "10",
-               CompanyName = "RDF Corporate Services",
-               DepartmentCode = "0010",
-               DepartmentName = "Corporate Common",
-               LocationCode = "0001",
-               LocationName = "Head Office",
-               AccountTitleCode = "115998",
-               AccountTitle = "Materials & Supplies Inventory",
-               TransactionType = "Transformation",
-               Formula = string.Join(", ",
-        g.Where(x =>
-            x.fr != null &&
-            x.f != null &&
-            x.fr.TransformationFormulaId == x.f.Id &&
-            x.rm != null &&
-            x.cat != null &&
-            x.cat.Id == x.rm.ItemCategoryId &&
-            x.rm.Id == x.fr.RawMaterialId &&
-            x.m.ItemCode == x.f.ItemCode)
-         .Select(x => x.cat.ItemCategoryName)
-         .Distinct()
-    )
-
-           });
+            }).ToList();
 
             var cancelledConsol = _context.Orders
                  .Where(x => x.IsCancel == true).Where(x => (x.CancelDate.Value.Date >= DateTime.Parse(DateFrom).Date
@@ -2138,7 +2266,7 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 .Concat(moveOrderConsol)
                 .Concat(receiptConsol)
                 .Concat(issueConsol)
-                .Concat(transformConsol)
+                .Concat(final)
                 .Concat(cancelledConsol)
                 .ToList();
 
@@ -2166,6 +2294,12 @@ namespace ELIXIR.DATA.DATA_ACCESS_LAYER.REPOSITORIES.REPORT_REPOSITORY
                 DepartmentName = consol.DepartmentName,
                 LocationCode = consol.LocationCode,
                 LocationName = consol.LocationName,
+                BusinessUnitCode = consol.BusinessUnitCode,
+                BusinessUnitName = consol.BusinessUnitName,
+                DepartmentUnitCode = consol.DepartmentUnitCode,
+                DepartmentUnitName = consol.DepartmentUnitName,
+                SubUnitCode = consol.SubUnitCode,
+                SubUnitName = consol.SubUnitName,
                 AccountTitleCode = consol.AccountTitleCode,
                 AccountTitle = consol.AccountTitle,
                 EmpId = consol.EmpId,
